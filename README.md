@@ -1,6 +1,4 @@
 # OPERA_TROPO
-[![Pytest and build docker image](https://github.com/opera-adt/opera_tropo/actions/workflows/test-build-push.yml/badge.svg?branch=main)](https://github.com/opera-adt/opera_tropo/actions/workflows/test-build-push.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/opera-adt/opera_tropo/main.svg)](https://results.pre-commit.ci/latest/github/opera-adt/opera_tropo/main)
 
 Tropospheric Correction workflow for global OPERA TROPO products.
 
