@@ -7,7 +7,6 @@ from botocore import UNSIGNED
 from botocore.client import Config
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
-
 logging.getLogger("backoff").addHandler(logging.StreamHandler())
 logger = logging.getLogger(__name__)
 

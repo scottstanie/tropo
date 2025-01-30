@@ -5,9 +5,9 @@ __all__ = ["run_cli", "run_main"]
 
 
 def run_main(config_file: str, debug: bool = False) -> None:
-    """Run the displacement workflow for CONFIG_FILE."""
+    """Run the troposphere workflow for CONFIG_FILE."""
     # rest of imports here so --help doesn't take forever
-    from src.opera_tropo.main import run
+    from opera_tropo.main import run
     from opera_tropo.config.pge_runconfig import RunConfig
 
     pge_runconfig = RunConfig.from_yaml(config_file)

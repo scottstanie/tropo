@@ -42,7 +42,7 @@ def tropo(file_path: str,
           num_workers: int = 1,
           num_threads: int = 1,
           max_memory: int = 4,  # GB
-          compression_options: dict = None,
+          compression_options: dict = {},
           temp_dir: str = None,
           keep_bits: bool = True) -> None:
     """

@@ -14,7 +14,7 @@ def run(
     config_file: str,
     debug: bool = False,
 ) -> None:
-    """Run the displacement workflow.
+    """Run the troposphere workflow.
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ def run(
     """
     # rest of imports here so --help doesn't take forever
 
-    from src.opera_tropo import main # main scripto to run 
+    from opera_tropo import main # main scripto to run 
     from opera_tropo.config.runconfig import TropoWorkflow  # configuration for the workflow
 
     cfg = TropoWorkflow.from_yaml(config_file)

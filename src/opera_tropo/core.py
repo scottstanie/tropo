@@ -1,15 +1,15 @@
 import numpy as np
 import xarray as xr
 from opera_tropo._pack import pack_ztd
+from opera_tropo.log.loggin_setup import log_runtime
 from opera_tropo.utils import round_mantissa,round_mantissa_xr
 
 import RAiDER.models
 
-#@log_runtime
 # NOTE: I could add interpolation to specific height levels here
 #       to lower the resolution of the data, and its memory footprint during processing
 #       but I will leave that for a future performance tests
-
+@log_runtime
 def calculate_ztd(da: xr.Dataset, out_heights: list = [],
                   chunk_size=None, keep_bits:bool=True) -> xr.Dataset:
         """Calculate Zenith Total Delay (ZTD) using HRES weather model data."""
@@ -57,11 +57,6 @@ def calculate_ztd(da: xr.Dataset, out_heights: list = [],
         # Compute zenith delays at the weather model grid nodes
         hres_model._getZTD()
 
-        # Round mantissa of the wet and hydrostatic ZTDs
-        #if keep_bits:
-        #    round_mantissa(hres_model._wet_ztd, keep_bits)
-        #    round_mantissa(hres_model._hydrostatic_ztd, keep_bits)
-
         # Package ztd
         ztd_xr = pack_ztd(
                 hres_model._wet_ztd,
@@ -80,11 +75,5 @@ def calculate_ztd(da: xr.Dataset, out_heights: list = [],
         if len(out_heights) > 1:
             ztd_xr = ztd_xr.interp(height=out_heights,
                                    method='cubic')
-            
-        # Round mantissa of the wet and hydrostatic ZTDs
-        # Gives me error: read_only Dataset with map_blocks
-        #if keep_bits:
-        #    ztd_xr = ztd_xr.map(round_mantissa_xr,
-        #                        keep_bits=keep_bits)
 
         return ztd_xr

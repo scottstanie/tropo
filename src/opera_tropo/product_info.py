@@ -96,7 +96,7 @@ class TropoCoordAttrs:
 ### DATASET VARIABLES ###
 @dataclass
 class ProductInfo:
-    """Information about a displacement product dataset."""
+    """Information about a troposphere product dataset."""
 
     name: str
     long_name: str
