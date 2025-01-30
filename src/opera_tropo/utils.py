@@ -1,6 +1,7 @@
 import xarray as xr
 import numpy as np
 import resource
+import sys
 
 # This is obsolete
 def get_chunks_indices(xr_array: xr.Dataset) -> list:
