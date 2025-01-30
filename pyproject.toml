@@ -28,12 +28,12 @@ Homepage = "https://github.com/opera-adt/opera_tropo"
 
 # Entry points for the command line interface
 [project.scripts]
-disp-s1 = "opera_tropo.cli:cli_app"
+opera_tropo = "opera_tropo.cli:cli_app"
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
-# extra requirements: `pip install disp_s1[docs]` or `pip install .[docs]`
+# extra requirements: `pip install opera_tropo[docs]` or `pip install .[docs]`
 [tool.setuptools.dynamic.optional-dependencies.docs]
 file = ["docs/requirements.txt"]
 [tool.setuptools.dynamic.optional-dependencies.test]

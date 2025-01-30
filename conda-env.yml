@@ -8,10 +8,12 @@ dependencies:
   - git  # for pip install, due to setuptools_scm
   - click>=7.0
   - h5netcdf>=1.0
+  - netcdf4
+  - scipy
   - matplotlib-base
   - pydantic>=2.1
   - ruamel.yaml>=0.15
   - yamale
   - xarray
   # RAiDER Base
-  - raider-base=0.5.3=conda_forge
+  - raider-base>=0.5.3

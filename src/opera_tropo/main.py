@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 
 import RAiDER
 
-from opera_tropo.run import tropo 
-from opera_tropo.utils import get_hres_datetime, get_max_memory_usage
-from opera_tropo.config import runconfig, pge_runconfig
-from opera_tropo.log.loggin_setup import setup_logging, log_runtime
-
+from .run import tropo 
+from .utils import get_hres_datetime, get_max_memory_usage
+from .config import runconfig, pge_runconfig
+from .log.loggin_setup import setup_logging, log_runtime
+from opera_tropo import __version__
 
 @log_runtime
 def run(

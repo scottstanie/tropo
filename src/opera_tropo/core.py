@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import numpy as np
+import logging
 import xarray as xr
 from ._pack import pack_ztd
 from .log.loggin_setup import log_runtime
 
 from RAiDER.models import HRES
+
+logger = logging.getLogger(__name__)
 
 # NOTE: I could add interpolation to specific height levels here
 #       to lower the resolution of the data, and its memory footprint during processing

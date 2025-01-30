@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 import logging
 import numpy as np
@@ -5,11 +7,11 @@ import xarray as xr
 from pathlib import Path
 from dask.distributed import Client
 
-from opera_tropo.log import loggin_setup
-from opera_tropo.core import calculate_ztd
-from opera_tropo._pack import pack_ztd
-from opera_tropo.utils import round_mantissa_xr
-from opera_tropo.product_info import TROPO_PRODUCTS
+from .log import loggin_setup
+from .core import calculate_ztd
+from ._pack import pack_ztd
+from .utils import round_mantissa_xr
+from .product_info import TROPO_PRODUCTS
 
 try:
     from RAiDER.models.model_levels import A_137_HRES, LEVELS_137_HEIGHTS

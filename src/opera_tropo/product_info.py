@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 from datetime import datetime, timezone
 from numpy.typing import DTypeLike
@@ -144,7 +146,7 @@ class TropoProducts:
             description=(
                 "Total Zenith Wet Delay Correction at the top of the atmosphere"
             ),
-            fillvalue=np.nan,
+            fillvalue=np.nan, 
             # Note sure should I keep grid_mapping here
             attrs={"units": "meters",
                    "grid_mapping": "spatial_ref"},

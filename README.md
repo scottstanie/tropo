@@ -20,9 +20,9 @@ conda activate my-disp-env
 ```
 or install within your existing env with mamba.
 
-3. Install `RAiDER` and `opera_tropo` via pip in editable mode
+3. Install `opera_tropo` via pip in editable mode
 ```bash
-python -m pip install --no-deps -e RAiDER/ opera_tropo/
+python -m pip install --no-deps -e  opera_tropo
 ```
 
 ### Setup for contributing

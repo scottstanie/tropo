@@ -1,7 +1,7 @@
-input_options:
+input_file:
   # REQUIRED: path to HRES model file.
   #   Type: string | Path.
-  input_file_path: /path/to/hres/model/file
+  input_file_path: /u/trappist-r0/govorcin/01_OPERA/HRES/data/D01010000010100001.subset.zz.nc
 
 
 primary_executable:
@@ -16,7 +16,7 @@ product_path_group:
   product_path: output/historical
   # Path to the scratch directory.
   #   Type: string.
-  scratch_path: scratch/historical
+  scratch_path: /u/trappist-r0/govorcin/01_OPERA/HRES/data/scratch
   # Path to the SAS output directory.
   #   Type: string.
   sas_output_path: output/historical
@@ -28,7 +28,7 @@ product_path_group:
 worker_settings:
   # Number of workers to run in parallel 
   #   Type: integer.
-  n_workers: 1
+  n_workers: 4
   # Number of threads to use per worker. This sets the OMP_NUM_THREADS environment variable in
   #   each python process.
   #   Type: integer.
@@ -43,7 +43,7 @@ worker_settings:
   #   Type: array.
   block_shape:
     - 128
-    - 256
+    - 128
 
 
 output_options:
@@ -65,4 +65,4 @@ output_options:
 
 # Path to the output log file in addition to logging to stderr.
 #   Type: string | null.
-log_file: scratch/historical/log_sas.log
+log_file: /u/trappist-r0/govorcin/01_OPERA/HRES/data/scratch/log_sas.log
