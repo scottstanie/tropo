@@ -1,0 +1,8 @@
+name: opera_tropo
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - raider-base=0.5.3=conda_forge
+  - pydantic
+  - ruamel.yaml
