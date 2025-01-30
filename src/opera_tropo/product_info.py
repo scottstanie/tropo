@@ -13,7 +13,9 @@ GLOBAL_ATTRS = {
     "source_url": "https://www.ecmwf.int/en/forecasts/datasets/set-i",
     "history": str(datetime.now(timezone.utc)),
     "references":   "https://raider.readthedocs.io/en/latest/", 
-    "description": "OPERA One-way Tropospheric Zenith Delay, interpolate with DEM and multiple with -4pi/radar wavelength (2 way) to get the SAR correction",
+    "description": ("OPERA One-way Tropospheric Zenith Delay, interpolate"
+                   " with DEM and multiple with -4pi/radar wavelength (2 way)"
+                   " to get the SAR correction"),
     "software": "RAiDER",
     "software_version": f"{RAiDER.__version__}",
     }

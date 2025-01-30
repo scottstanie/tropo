@@ -1,7 +1,6 @@
 import numpy as np
 import xarray as xr
 from opera_tropo._pack import pack_ztd
-from src.opera_tropo.log.obsolete._log import log_runtime
 from opera_tropo.utils import round_mantissa,round_mantissa_xr
 
 import RAiDER.models

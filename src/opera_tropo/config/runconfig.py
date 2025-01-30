@@ -45,7 +45,7 @@ class InputOptions(BaseModel, extra="forbid"):
 
     _directory: Path = PrivateAttr(Path("data"))
 
-    input_file_path: str = Field(
+    input_file_path: str | Path = Field(
         default_factory=str,
         description="Path to the input HRES model hres_model.nc",
         )
