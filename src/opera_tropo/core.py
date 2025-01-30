@@ -1,10 +1,9 @@
 import numpy as np
 import xarray as xr
-from opera_tropo._pack import pack_ztd
-from opera_tropo.log.loggin_setup import log_runtime
-from opera_tropo.utils import round_mantissa,round_mantissa_xr
+from ._pack import pack_ztd
+from .log.loggin_setup import log_runtime
 
-import RAiDER.models
+from RAiDER.models import HRES
 
 # NOTE: I could add interpolation to specific height levels here
 #       to lower the resolution of the data, and its memory footprint during processing
@@ -13,7 +12,7 @@ import RAiDER.models
 def calculate_ztd(da: xr.Dataset, out_heights: list = [],
                   chunk_size=None, keep_bits:bool=True) -> xr.Dataset:
         """Calculate Zenith Total Delay (ZTD) using HRES weather model data."""
-        hres_model = RAiDER.models.HRES()
+        hres_model = HRES()
 
         # Extract temperature and specific humidity at the first time step
         hres_model._t = da.t.isel(time=0).values

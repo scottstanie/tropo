@@ -50,7 +50,7 @@ class TropoCoordAttrs:
             long_name="latitude",
             description=("Angular distance of a point north or south"
                          " of the equator."),
-            encoding=None
+            encoding={}
         )
     )
     longitude: ProductCoords = field(
@@ -61,7 +61,7 @@ class TropoCoordAttrs:
             long_name="longitude",
             description=("Angular distance of a point east or west"
                          " of the Prime Meridian."),
-            encoding=None
+            encoding={}
         )
     )
     height: ProductCoords = field(
@@ -71,7 +71,7 @@ class TropoCoordAttrs:
             standard_name="height",
             long_name="ellipsoidal_height",
             description="Height above ellipsoid WGS84",
-            encoding=None
+            encoding={}
         )
     )
     time: ProductCoords = field(

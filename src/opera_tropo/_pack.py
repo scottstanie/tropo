@@ -2,7 +2,7 @@ import numpy as np
 import xarray as xr
 
 from .product_info import TROPO_PRODUCTS, GLOBAL_ATTRS
-from opera_tropo.utils import round_mantissa
+from .utils import round_mantissa
 
 # NOTE: check if it is better to add attributes at the end to
 #       leave this empty and more light
