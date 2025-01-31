@@ -1,5 +1,7 @@
 FROM condaforge/mambaforge:latest
 
+LABEL description='OPERA_TROPO'
+
 # For opencontainers label definitions, see:
 #    https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.title="opera_tropo"
@@ -18,31 +20,39 @@ LABEL org.opencontainers.image.documentation="https://github.com/opera-adt/opera
 ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONDONTWRITEBYTECODE=true
 
-RUN apt-get update && apt-get install -y --no-install-recommends git unzip vim && \
+# Install dependencies in a single RUN command
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git unzip vim && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# run commands in a bash login shell
+SHELL ["/bin/bash", "-l", "-c"]
 
 # Create non-root user/group with default inputs
 ARG CONDA_UID=1000
 ARG CONDA_GID=1000
 
-RUN groupadd -g "${CONDA_GID}" --system tropo && \
-    useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/tropo -m  -s /bin/bash tropo && \
-    chown -R tropo:tropo /opt
+RUN groupadd -g "${CONDA_GID}" --system tropo_user && \
+    useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/ops -m  -s /bin/bash tropo_user && \
+    chown -R tropo_user:tropo_user /opt
 
 USER ${CONDA_UID}
-WORKDIR /home/tropo
-SHELL ["/bin/bash", "-l", "-c"]
+WORKDIR /home/ops
 
-COPY --chown=${CONDA_UID}:${CONDA_GID} . /opera_tropo/
+# Copy files while preserving ownership
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#leverage-build-cach
+COPY --chown=tropo_user:tropo_user conda-env.yml /home/ops/opera_tropo/conda-env.yml
+COPY --chown=tropo_user:tropo_user . /home/ops/opera_tropo
 
-RUN mamba env create -f /opera_tropo/conda-env.yml && \
+# Ensure all files are read/write by the user
+RUN chmod -R 777 /home/ops
+
+# Create the environment with mamba
+RUN mamba env create -f /home/ops/opera_tropo/conda-env.yml && \
     conda clean -afy
 
-# Ensure that environment is activated on startup
-RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.profile && \
-    echo "conda activate opera_tropo" >> ~/.profile
+ENV CONDA_DEFAULT_ENV=opera_tropo
+ENV PATH="/opt/conda/envs/${CONDA_DEFAULT_ENV}/bin:$PATH"
 
-RUN python -m pip install --no-cache-dir /RAiDER/
-
-ENTRYPOINT ["/RAiDER/tools/RAiDER/etc/entrypoint.sh"]
-CMD ["--help"]
+# Install repository with pip
+RUN python -m pip install --no-cache-dir /home/ops/opera_tropo
