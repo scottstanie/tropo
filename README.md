@@ -25,6 +25,24 @@ or install within your existing env with mamba.
 python -m pip install --no-deps -e  opera_tropo
 ```
 
+### Usage
+
+There are 3 entrypoints for the OPERA-TROPO workflow
+
+1. Download HRES model *.nc from s3 bucekt to local directory
+```bash
+opera_tropo download -s3 "bucket_path" --date 20190613 --hour 00
+```
+2. Run troposphere phase delay estimation, require configuration file
+   default configs can be found in opera_tropo/config/default
+```bash
+opera_tropo run pge_runconfig.yaml
+```
+3. Make browser image
+TODO
+4. Validate 
+TODO
+
 ### Setup for contributing
 
 
