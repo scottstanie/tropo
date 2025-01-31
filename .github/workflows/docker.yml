@@ -1,4 +1,4 @@
-name: Docker
+name: Docker Build & Publish
 
 on:
   pull_request:
@@ -15,11 +15,33 @@ concurrency:
 
 jobs:
   docker-build:
-    name: Build & smoke test Docker image
+    name: Build, Test & Publish Docker Image
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: docker build --network=host --tag=test/opera_tropo --file=docker/Dockerfile .
-      - run: docker run --rm test/opera_tropo opera_tropo run --help
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build the Docker image
+        run: |
+          docker build --network=host \
+            --tag ghcr.io/${{ github.repository_owner }}/opera_tropo:latest \
+            --file=docker/Dockerfile .
+
+      - name: Run a smoke test
+        run: |
+          docker run --rm ghcr.io/${{ github.repository_owner }}/opera_tropo:latest opera_tropo run --help
+
+      - name: Push the Docker image to GHCR
+        run: docker push ghcr.io/${{ github.repository_owner }}/opera_tropo:latest
+
+      - name: Print download command
+        run: |
+          echo "✅ Docker image published!"
+          echo "To pull the image, run:"
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/opera_tropo:latest"
