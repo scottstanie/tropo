@@ -11,6 +11,7 @@ dependencies:
   - netcdf4
   - numpy
   - scipy
+  - cmap
   - matplotlib-base
   - pydantic>=2.1
   - ruamel.yaml>=0.15
