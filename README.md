@@ -1,4 +1,4 @@
-# OPERA_TROPO
+# OPERA TROPO
 
 Tropospheric Correction workflow for global OPERA TROPO products.
 
@@ -29,7 +29,7 @@ python -m pip install --no-deps -e  opera_tropo
 
 There are 3 entrypoints for the OPERA-TROPO workflow
 
-1. Download HRES model *.nc from s3 bucekt to local directory
+1. Download HRES model *.nc from s3 bucket to local directory
 ```bash
 opera_tropo download -s3 "bucket_path" --date 20190613 --hour 00
 ```
