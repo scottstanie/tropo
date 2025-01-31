@@ -1,6 +1,6 @@
 import click
 
-#from .download import download_group
+from .download import download
 #from .make_browse import make_browse
 from .run import run_cli
 #from .validate import validate
@@ -20,7 +20,7 @@ def cli_app(ctx: click.Context, debug: bool) -> None:
 cli_app.add_command(run_cli)
 #cli_app.add_command(validate)
 #cli_app.add_command(make_browse)
-#cli_app.add_command(download_group)
+cli_app.add_command(download)
 
 if __name__ == "__main__":
     cli_app()

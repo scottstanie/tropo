@@ -35,10 +35,10 @@ def run(
     """
 
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
-    setup_logging(logger_name="RAiDER", filename=cfg.log_file)    
+    #setup_logging(logger_name="RAiDER", filename=cfg.log_file)    
 
     #Save the start for a metadata field
-    processing_start_datetime = datetime.now(timezone.utc)
+    #processing_start_datetime = datetime.now(timezone.utc)
     cfg.work_directory.mkdir(exist_ok=True, parents=True)
 
     # Get output filename
@@ -47,18 +47,19 @@ def run(
 
     # Run dolphin's displacement workflow
     tropo(file_path = cfg.input_options.input_file_path,
-              output_file = Path(cfg.work_directory) / output_filename,
-              out_heights = cfg.output_options.output_heights,
-              lat_chunk_size = cfg.worker_settings.block_shape[0],
-              lon_chunk_size = cfg.worker_settings.block_shape[1],
-              num_workers = cfg.worker_settings.n_workers,
-              num_threads = cfg.worker_settings.threads_per_worker,
-              max_memory = cfg.worker_settings.max_memory,
-              compression_options = cfg.output_options.compression_kwargs,
-              temp_dir = cfg.worker_settings.dask_temp_dir
+          output_file = Path(cfg.work_directory) / output_filename,
+          out_heights = cfg.output_options.output_heights,
+          lat_chunk_size = cfg.worker_settings.block_shape[0],
+          lon_chunk_size = cfg.worker_settings.block_shape[1],
+          num_workers = cfg.worker_settings.n_workers,
+          num_threads = cfg.worker_settings.threads_per_worker,
+          max_memory = cfg.worker_settings.max_memory,
+          compression_options = cfg.output_options.compression_kwargs,
+          temp_dir = cfg.worker_settings.dask_temp_dir
          )
               #debug=debug)
 
+    logger.info(f"Output file: {Path(cfg.work_directory) / output_filename}")
     logger.info(f"Product type: {pge_runconfig.primary_executable.product_type}")
     logger.info(f"Product version: {pge_runconfig.product_path_group.product_version}")
     max_mem = get_max_memory_usage(units="GB")

@@ -8,7 +8,7 @@ from .log.loggin_setup import log_runtime
 
 from RAiDER.models import HRES
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('opera_tropo')
 
 # NOTE: I could add interpolation to specific height levels here
 #       to lower the resolution of the data, and its memory footprint during processing

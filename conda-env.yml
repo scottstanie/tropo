@@ -9,6 +9,7 @@ dependencies:
   - click>=7.0
   - h5netcdf>=1.0
   - netcdf4
+  - numpy
   - scipy
   - matplotlib-base
   - pydantic>=2.1
