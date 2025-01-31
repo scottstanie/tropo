@@ -7,7 +7,7 @@ import xarray as xr
 from pathlib import Path
 from dask.distributed import Client
 
-from .log import loggin_setup
+from .log.loggin_setup import log_runtime 
 from .core import calculate_ztd
 from ._pack import pack_ztd
 from .utils import round_mantissa_xr
@@ -34,7 +34,7 @@ def _rounding_mantissa_blocks(ds: xr.DataArray, keep_bits:int):
     return ds.map(round_mantissa_xr, keep_bits=keep_bits)
 
 
-@loggin_setup.log_runtime
+@log_runtime
 def tropo(file_path: str,
           output_file: str,
           *,
