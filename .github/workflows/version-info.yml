@@ -19,7 +19,7 @@ jobs:
 
       - uses: mamba-org/setup-micromamba@v2
         with:
-          environment-file: environment.yml  # Adjust path if different
+          environment-file: conda-env.yml  # Adjust path if different
           create-args: >-
             python=${{ github.event.inputs.python_version || '3.12' }}
 
