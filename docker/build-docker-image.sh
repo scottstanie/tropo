@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-image_name=${TAG:-"opera-adt/tropo:latest"}
+image_name=${TAG:-"opera-adt/opera_adt:latest"}
 
 # Build the Docker image
 cmd_base="docker build --network=host --tag $image_name --file docker/Dockerfile"
