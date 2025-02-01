@@ -92,7 +92,7 @@ def download_hres(config: HRESConfig) -> None:
     logger.info(f"Downloading HRES {s3_key} from {config.s3_bucket}")
     Path(config.output_path).mkdir(parents=True, exist_ok=True)
     output_file = Path(config.output_path) / filename
-    print(s3_key)
+    print(output_file)
 
     try:
         download_from_s3(config.s3_bucket, s3_key,

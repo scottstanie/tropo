@@ -1,6 +1,6 @@
 # OPERA TROPO
 
-Tropospheric Correction workflow for global OPERA TROPO products.
+Tropospheric Delay Estimation workflow for global OPERA TROPO products.
 
 Creates the science application software (SAS) using the [RAiDER](https://github.com/dbekaert/RAiDER) library.
 
@@ -26,7 +26,7 @@ python -m pip install --no-deps -e  opera_tropo
 
 ### Usage
 
-There are 3 entrypoints for the OPERA-TROPO workflow
+There are 4 entrypoints for the OPERA-TROPO workflow
 
 1. Download HRES model *.nc from s3 bucket to local directory
 ```bash
