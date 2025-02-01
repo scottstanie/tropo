@@ -6,6 +6,9 @@ on:
       - main
       - dev
 
+permissions:
+  pull-requests: read
+
 jobs:
   changelog-check:
     name: Changelog Check
@@ -13,39 +16,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          fetch-depth: 0
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
       - name: Verify Changelog is Updated
         run: |
-          # Check if there is a changelog file, assuming it's `CHANGELOG.md`
-          if ! git diff --exit-code --name-only HEAD~1 | grep -E '^CHANGELOG\.md$'; then
+          if ! git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q '^CHANGELOG\.md$'; then
             echo "No changelog update detected!"
             exit 1
           else
             echo "Changelog has been updated."
           fi
 
-      - name: Check for new changelog entries
+      - name: Check for new changelog entries in PR body
         run: |
-          # Ensure there is an entry for this PR (check if the changelog has a new entry)
-          PR_BODY="${{ github.event.pull_request.body }}" 
-          if ! echo "$PR_BODY" | grep -q '.*#changelog.*'; then
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if ! echo "$PR_BODY" | grep -qi '#changelog'; then
             echo "This pull request does not include a changelog entry!"
             exit 1
           else
             echo "PR includes a changelog entry."
           fi
-
-      - name: Set GitHub status to success/failure
-        if: failure()
-        run: |
-          echo "Changelog is missing or not updated correctly."
-          exit 1
