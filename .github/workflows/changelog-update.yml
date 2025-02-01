@@ -1,16 +1,52 @@
-name: Changelog updated?
+name: Check Changelog
 
 on:
   pull_request:
-    types:
-      - opened
-      - labeled
-      - unlabeled
-      - synchronize
     branches:
       - main
       - dev
 
 jobs:
-  call-changelog-check-workflow:
-    uses: ASFHyP3/actions/.github/workflows/reusable-changelog-check.yml@v0.15.0
+  changelog-check:
+    name: Changelog Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify Changelog is Updated
+        run: |
+          # Check if there is a changelog file, assuming it's `CHANGELOG.md`
+          if ! git diff --exit-code --name-only HEAD~1 | grep -E '^CHANGELOG\.md$'; then
+            echo "No changelog update detected!"
+            exit 1
+          else
+            echo "Changelog has been updated."
+          fi
+
+      - name: Check for new changelog entries
+        run: |
+          # Ensure there is an entry for this PR (check if the changelog has a new entry)
+          PR_BODY=$(jq -r .pull_request.body "${GITHUB_EVENT_PATH}")
+          if ! echo "$PR_BODY" | grep -q '.*#changelog.*'; then
+            echo "This pull request does not include a changelog entry!"
+            exit 1
+          else
+            echo "PR includes a changelog entry."
+          fi
+
+      - name: Set GitHub status to success/failure
+        if: failure()
+        run: |
+          echo "Changelog is missing or not updated correctly."
+          exit 1
