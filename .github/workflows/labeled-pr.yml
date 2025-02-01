@@ -1,0 +1,22 @@
+name: Is PR labeled?
+
+on:
+  pull_request:
+    types:
+      - opened
+      - labeled
+      - unlabeled
+      - synchronize
+    branches:
+      - main
+
+jobs:
+    bump-labeled:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Require Version Bump Labels
+            uses: mheap/github-action-required-labels@v5
+            with:
+              mode: exactly
+              count: 1
+              labels: "major, minor, patch, bumpless"
