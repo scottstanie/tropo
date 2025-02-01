@@ -1,10 +1,17 @@
 name: Version Info
 
 on:
-  pull_request:
-    branches:
-      - main
-      - dev
+    workflow_call:
+      inputs:
+        python_version:
+          required: false
+          default: '3.12'
+          type: string
+      outputs:
+        version:
+          value: ${{ jobs.version_info.outputs.version }}
+        version_tag:
+          value: ${{ jobs.version_info.outputs.version_tag }}
 
 jobs:
   version_info:
