@@ -14,8 +14,8 @@ git clone https://github.com/opera-adt/opera_tropo.git
 ```
 2. Install dependencies, either to a new environment:
 ```bash
-mamba env create --name my-tropo-env --file opera_tropo/conda-env.yml
-conda activate my-disp-env
+mamba env create --name opera_tropo --file opera_tropo/conda-env.yml
+conda activate opera_tropo 
 ```
 or install within your existing env with mamba.
 
@@ -38,7 +38,10 @@ opera_tropo download -s3 "bucket_path" --date 20190613 --hour 00
 opera_tropo run pge_runconfig.yaml
 ```
 3. Make browser image
-TODO
+```bash
+opera_tropo make-browse -i OPERA_L4_TROPO_GLOBAL_20190101T000000Z_20250130T232942Z_HRES_0.1_v0.1.nc
+```
+
 4. Validate 
 TODO
 
