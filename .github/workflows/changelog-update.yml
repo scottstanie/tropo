@@ -36,7 +36,7 @@ jobs:
       - name: Check for new changelog entries
         run: |
           # Ensure there is an entry for this PR (check if the changelog has a new entry)
-          PR_BODY=$(jq -r .pull_request.body "${GITHUB_EVENT_PATH}")
+          PR_BODY="${{ github.event.pull_request.body }}" 
           if ! echo "$PR_BODY" | grep -q '.*#changelog.*'; then
             echo "This pull request does not include a changelog entry!"
             exit 1

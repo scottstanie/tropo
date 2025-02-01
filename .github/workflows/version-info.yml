@@ -1,17 +1,10 @@
 name: Version Info
 
 on:
-    workflow_call:
-      inputs:
-        python_version:
-          required: false
-          default: '3.12'
-          type: string
-      outputs:
-        version:
-          value: ${{ jobs.version_info.outputs.version }}
-        version_tag:
-          value: ${{ jobs.version_info.outputs.version_tag }}
+    push:
+      branches:
+        - main
+        - dev
 
 jobs:
   version_info:
@@ -28,7 +21,7 @@ jobs:
         with:
           environment-file: conda-env.yml  # Adjust path if different
           create-args: >-
-            python=${{ github.event.inputs.python_version || '3.12' }}
+           python=${{ inputs.python_version || '3.12' }} 
 
       - name: set outputs
         id: set_outputs
