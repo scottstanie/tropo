@@ -104,7 +104,7 @@ class OutputOptions(BaseModel, extra="forbid"):
         date_time = datetime.strptime(f"{date}T{hour}", '%Y%m%dT%H')
         date_time = date_time.strftime(self.date_fmt)
         proc_datetime = self.creation_time.strftime(self.date_fmt) 
-        return f"OPERA_L4_TROPO_GLOBAL_{date_time}Z_{proc_datetime}Z_HRES_0.1_v{self.product_version}.nc"
+        return f"OPERA_L4_TROPO_{date_time}Z_{proc_datetime}Z_HRES_0.1_v{self.product_version}.nc"
 
 class WorkerSettings(BaseModel, extra="forbid"):
     """Settings for controlling CPU settings and parallelism."""

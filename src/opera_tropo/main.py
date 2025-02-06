@@ -12,6 +12,7 @@ from .run import tropo
 from .utils import get_hres_datetime, get_max_memory_usage
 from .config import runconfig, pge_runconfig
 from .log.loggin_setup import setup_logging, log_runtime
+from  .browse_image import make_browse_image_from_nc
 from opera_tropo import __version__
 
 @log_runtime
@@ -35,7 +36,7 @@ def run(
     """
 
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
-    #setup_logging(logger_name="RAiDER", filename=cfg.log_file)    
+    setup_logging(logger_name="RAiDER", filename=cfg.log_file)    
 
     #Save the start for a metadata field
     #processing_start_datetime = datetime.now(timezone.utc)
@@ -57,9 +58,14 @@ def run(
           compression_options = cfg.output_options.compression_kwargs,
           temp_dir = cfg.worker_settings.dask_temp_dir
          )
-              #debug=debug)
 
+    # Generate output browse image
     logger.info(f"Output file: {Path(cfg.work_directory) / output_filename}")
+    output_png = Path(cfg.work_directory) / output_filename
+    output_png = output_png.with_suffix(".png")
+    logger.info(f"Output browse image: {output_png}")
+    make_browse_image_from_nc(output_png, Path(cfg.work_directory) / output_filename)
+
     logger.info(f"Product type: {pge_runconfig.primary_executable.product_type}")
     logger.info(f"Product version: {pge_runconfig.product_path_group.product_version}")
     max_mem = get_max_memory_usage(units="GB")

@@ -8,18 +8,20 @@ from dataclasses import dataclass, field
 import RAiDER
 
 GLOBAL_ATTRS = {
-    "Conventions": "CF-1.7",
+    "Conventions": "CF-1.8",
     "title": "OPERA Zenith Troposphere Delay",
     "institution": "Jet Propulsion Laboratory (JPL)",
+    "Contact" : 'ops@jpl.nasa.gov', 
     "source": 'ECMWF, HRES model',
+    "mission_name": 'OPERA',
     "source_url": "https://www.ecmwf.int/en/forecasts/datasets/set-i",
-    "history": str(datetime.now(timezone.utc)),
     "references":   "https://raider.readthedocs.io/en/latest/", 
     "description": ("OPERA One-way Tropospheric Zenith Delay, interpolate"
                    " with DEM and multiple with -4pi/radar wavelength (2 way)"
                    " to get the SAR correction"),
     "software": "RAiDER",
     "software_version": f"{RAiDER.__version__}",
+    "history": f"Created on: {str(datetime.now(timezone.utc))}",
     }
 
 
@@ -47,7 +49,7 @@ class TropoCoordAttrs:
     latitude: ProductCoords = field(
         default_factory=lambda: ProductCoords(
             axis="y",
-            units="degrees",
+            units="degrees_north",
             standard_name="latitude",
             long_name="latitude",
             description=("Angular distance of a point north or south"
@@ -58,7 +60,7 @@ class TropoCoordAttrs:
     longitude: ProductCoords = field(
         default_factory=lambda: ProductCoords(
             axis="x",
-            units="degrees",
+            units="degrees_east",
             standard_name="longitude",
             long_name="longitude",
             description=("Angular distance of a point east or west"
@@ -82,7 +84,7 @@ class TropoCoordAttrs:
             units=None, # units specified in encoding
             standard_name="time",
             long_name="UTC time",
-            description="Model base time",
+            description="Numerical Weather Model base time",
             encoding={
                 "units": "hours since 1900-01-01",
                 "calendar": "gregorian"
@@ -126,7 +128,7 @@ class TropoProducts:
             name="wet_delay",
             long_name="one way zenith wet delay",
             description=(
-                "Total Zenith Wet Delay Correction at the top of the atmosphere"
+                "Zenith Wet Delay."
             ),
             fillvalue=np.nan,
             # Note sure should I keep grid_mapping here
@@ -144,7 +146,7 @@ class TropoProducts:
             name="hydrostatic_delay",
             long_name="one way zenith hydrostatic delay",
             description=(
-                "Total Zenith Wet Delay Correction at the top of the atmosphere"
+                "Zenith Wet Delay."
             ),
             fillvalue=np.nan, 
             # Note sure should I keep grid_mapping here

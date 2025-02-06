@@ -61,13 +61,14 @@ def make_browse_image_from_nc(
     cmap: str = DEFAULT_CMAP,
     vmin: float = 1.9,
     vmax: float = 2.5,
+    height: float = 800,
 ) -> None:
     """Create a PNG browse image for the output product from product in NetCDF file."""
 
     # Extract ZTD at zero height for browse image
     with xr.open_dataset(input_filename) as ds:
         wet = ds.wet_delay.isel(time=0).sel(height=0).data 
-        hydrostatic = ds.hydrostatic_delay.isel(time=0).sel(height=0).data
+        hydrostatic = ds.hydrostatic_delay.isel(time=0).sel(height=height, method='nearest').data
 
     ztd = wet + hydrostatic
 

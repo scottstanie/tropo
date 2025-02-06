@@ -26,14 +26,17 @@ click.option = functools.partial(click.option, show_default=True)
 @click.option(
     "--vmax", default=2.5, type=float, help="Maximum value for color scaling"
 )
-def make_browse(out_fname, in_fname, max_img_dim, cmap, vmin, vmax):
+@click.option(
+    "--height", default=800, type=float, help="Tropo height level to plot"
+)
+def make_browse(out_fname, in_fname, max_img_dim, cmap, vmin, vmax, height):
     """Create browse images for troposphere products from command line."""
     import opera_tropo.browse_image
 
     if out_fname is None:
         out_fname = in_fname.replace(".nc", f".png")
-    print(cmap)
+    
     cmap = Colormap(cmap).to_mpl()
     opera_tropo.browse_image.make_browse_image_from_nc(
-        out_fname, in_fname, max_img_dim, cmap, vmin, vmax
+        out_fname, in_fname, max_img_dim, cmap, vmin, vmax, height
     )
