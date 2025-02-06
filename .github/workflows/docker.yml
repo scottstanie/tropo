@@ -27,20 +27,19 @@ jobs:
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Set Image Tag
+      - name: Set Image Tag and Version Tag
         id: set_image_tag
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           
-          # Check if the event is a tag push or a branch push
+          # Check if the event is a tag push
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION_TAG="${GITHUB_REF##*/}"  # Extract version tag
             # Remove the leading 'v' if it's present
             VERSION_TAG="${VERSION_TAG#v}"
           else
-            #VERSION_TAG="${GITHUB_REF##*/}"  # Default fallback (if needed for branches)
-            # Optionally, you could handle branch versions differently here
-            VERSION_TAG=0.0.1
+            VERSION_TAG=""  # Set to empty or fallback if it's not a tag
+            echo "Not a tag push, using empty VERSION_TAG"
           fi
 
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
@@ -48,32 +47,46 @@ jobs:
 
       - name: Build the Docker image
         run: |
+          if [ -z "${{ env.VERSION_TAG }}" ]; then
+            echo "VERSION_TAG is empty, skipping image push."
+            exit 0  # Skip if VERSION_TAG is empty, i.e., it's not a tag push
+          fi
           docker build --network=host \
             --tag ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} \
             --file=docker/Dockerfile .
 
       - name: Run a smoke test
         run: |
-          docker run --rm ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} opera_tropo run --help
+          if [ -n "${{ env.VERSION_TAG }}" ]; then
+            docker run --rm ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} opera_tropo run --help
+          fi
 
       - name: Push the Docker image to GHCR
         run: |
-          docker push ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}
+          if [ -n "${{ env.VERSION_TAG }}" ]; then
+            docker push ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}
+          fi
 
       - name: Save Docker image to a tar file
         run: |
-          # Save the Docker image as a tar file
-          docker save ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} > tropo_${{ env.VERSION_TAG }}.tar
+          if [ -n "${{ env.VERSION_TAG }}" ]; then
+            TAR_PATH="${{ env.VERSION_TAG }}.tar"
+            docker save ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} > $TAR_PATH
+            echo "Docker image saved as $TAR_PATH"
+          fi
 
       - name: Upload Docker image tarball as artifact
         if: ${{ env.VERSION_TAG != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: docker-image-${{ env.VERSION_TAG }}.tar
           path: ${{ env.VERSION_TAG }}.tar
 
       - name: Print download command
         run: |
-          echo "✅ Docker image published!"
-          echo "To pull the image, run:"
-          echo "docker pull ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}"
+          if [ -n "${{ env.VERSION_TAG }}" ]; then
+            echo "✅ Docker image published!"
+            echo "To pull the image, run:"
+            echo "docker pull ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}"
+            echo "The tarball can be downloaded as an artifact from the workflow run page."
+          fi
