@@ -30,21 +30,33 @@ jobs:
       - name: Build the Docker image
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
-          VERSION_TAG="${GITHUB_REF##*/}" # Extract the version from the tag or branch name
+          # Extract the version tag for a proper format (e.g., "v1.0.0")
+          VERSION_TAG="${GITHUB_REF##*/}"
           
+          # Check if it's a tag and clean it (remove the 'v' from 'v1.0.0')
+          if [[ "$VERSION_TAG" =~ ^v.* ]]; then
+            VERSION_TAG="${VERSION_TAG:1}"
+          fi
+
           docker build --network=host \
             --tag ${IMAGE_TAG}:${VERSION_TAG} \
             --file=docker/Dockerfile .
 
       - name: Run a smoke test
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG} opera_tropo run --help
+          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
+          # Reuse the VERSION_TAG from the earlier steps
+          docker run --rm ${IMAGE_TAG}:${VERSION_TAG} opera_tropo run --help
 
       - name: Push the Docker image to GHCR
-        run: docker push ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG}
+        run: |
+          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
+          # Reuse the VERSION_TAG for push
+          docker push ${IMAGE_TAG}:${VERSION_TAG}
 
       - name: Print download command
         run: |
+          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           echo "✅ Docker image published!"
           echo "To pull the image, run:"
-          echo "docker pull ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG}"
+          echo "docker pull ${IMAGE_TAG}:${VERSION_TAG}"
