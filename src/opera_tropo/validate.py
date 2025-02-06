@@ -47,4 +47,4 @@ def compare_two_datasets(xr_file1 : str | Path, xr_file2 : str | Path) -> None:
     logger.info(f"Test Dataset Variable Data values")
     xr.testing.assert_equal(ds1, ds2)
 
-    print(f"✅ Datasets {Path(xr_file1).name} and {Path(xr_file2).name} match!")
+    logger.info(f"✅ Datasets {Path(xr_file1).name} and {Path(xr_file2).name} match!")
