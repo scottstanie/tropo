@@ -163,7 +163,7 @@ def tropo(file_path: str,
 
     # Note, apply again rounding as interpolation can change
     # output, double check if needed
-    if out_heights is not None & len(out_heights)>0 & keep_bits:
+    if out_heights is not None and len(out_heights)>0 and keep_bits:
         # use one keep_bits setting, need to figure how to apply
         # different rounding for each data_var in xr.Dataset
         keep_bit_kwargs = {'keep_bits': TROPO_PRODUCTS.wet_delay.keep_bits}

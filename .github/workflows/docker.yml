@@ -27,36 +27,37 @@ jobs:
       - name: Log in to GitHub Container Registry (GHCR)
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build the Docker image
+      - name: Set Image Tag
+        id: set_image_tag
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
-          # Extract the version tag for a proper format (e.g., "v1.0.0")
+          # Extract the version tag (e.g., "v1.0.0")
           VERSION_TAG="${GITHUB_REF##*/}"
           
-          # Check if it's a tag and clean it (remove the 'v' from 'v1.0.0')
+          # Clean the version tag (remove 'v' from 'v1.0.0')
           if [[ "$VERSION_TAG" =~ ^v.* ]]; then
             VERSION_TAG="${VERSION_TAG:1}"
           fi
 
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+
+      - name: Build the Docker image
+        run: |
           docker build --network=host \
-            --tag ${IMAGE_TAG}:${VERSION_TAG} \
+            --tag ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} \
             --file=docker/Dockerfile .
 
       - name: Run a smoke test
         run: |
-          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
-          # Reuse the VERSION_TAG from the earlier steps
-          docker run --rm "$IMAGE_TAG":"$VERSION_TAG" opera_tropo run --help
+          docker run --rm ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} opera_tropo run --help
 
       - name: Push the Docker image to GHCR
         run: |
-          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
-          # Reuse the VERSION_TAG for push
-          docker push "$IMAGE_TAG":"$VERSION_TAG" 
+          docker push ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}
 
       - name: Print download command
         run: |
-          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           echo "✅ Docker image published!"
           echo "To pull the image, run:"
-          echo "docker pull "$IMAGE_TAG":"$VERSION_TAG"
+          echo "docker pull ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}"
