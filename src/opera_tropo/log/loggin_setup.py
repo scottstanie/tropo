@@ -53,8 +53,8 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
     def test_func():
         return 2 + 4
     """
-    logger = logging.getLogger('tropo') # change name to __name__
-    print(f.__module__, __name__)
+    logger = logging.getLogger(__name__) 
+   
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs):
         # Get memory usage

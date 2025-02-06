@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import logging
-import psutil
 import xarray as xr
 from ._pack import pack_ztd
 from .log.loggin_setup import log_runtime
@@ -19,7 +18,6 @@ def calculate_ztd(da: xr.Dataset, out_heights: list = [],
                   chunk_size=None, keep_bits:bool=True) -> xr.Dataset:
         """Calculate Zenith Total Delay (ZTD) using HRES weather model data."""
         hres_model = HRES()
-        process = psutil.Process()
 
         # Extract temperature and specific humidity at the first time step
         hres_model._t = da.t.isel(time=0).values

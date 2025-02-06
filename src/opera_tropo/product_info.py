@@ -11,7 +11,7 @@ GLOBAL_ATTRS = {
     "Conventions": "CF-1.8",
     "title": "OPERA Zenith Troposphere Delay",
     "institution": "Jet Propulsion Laboratory (JPL)",
-    "Contact" : 'ops@jpl.nasa.gov', 
+    "contact" : 'ops@jpl.nasa.gov', 
     "source": 'ECMWF, HRES model',
     "mission_name": 'OPERA',
     "source_url": "https://www.ecmwf.int/en/forecasts/datasets/set-i",
