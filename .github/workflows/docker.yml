@@ -46,17 +46,17 @@ jobs:
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           # Reuse the VERSION_TAG from the earlier steps
-          docker run --rm ${IMAGE_TAG}:${VERSION_TAG} opera_tropo run --help
+          docker run --rm "$IMAGE_TAG":"$VERSION_TAG" opera_tropo run --help
 
       - name: Push the Docker image to GHCR
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           # Reuse the VERSION_TAG for push
-          docker push ${IMAGE_TAG}:${VERSION_TAG}
+          docker push "$IMAGE_TAG":"$VERSION_TAG" 
 
       - name: Print download command
         run: |
           IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
           echo "✅ Docker image published!"
           echo "To pull the image, run:"
-          echo "docker pull ${IMAGE_TAG}:${VERSION_TAG}"
+          echo "docker pull "$IMAGE_TAG":"$VERSION_TAG"
