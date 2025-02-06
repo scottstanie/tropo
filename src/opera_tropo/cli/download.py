@@ -2,7 +2,7 @@ import click
 import functools
 from pathlib import Path
 from opera_tropo.download import HRES_HOURS
-__all__ = ["run_cli", "run_main"]
+__all__ = ["download"]
 
 click.option = functools.partial(click.option, show_default=True)
 

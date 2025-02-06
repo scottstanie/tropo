@@ -20,7 +20,7 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-def setup_logging(*, logger_name: str = "RAiDER", debug: bool = False, filename: str = None):
+def setup_logging(*, logger_name: str = "opera_tropo", debug: bool = False, filename: str = None):
     config_file = Path(__file__).parent / "log-config.json"
 
     with open(config_file) as f_in:
@@ -53,8 +53,8 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
     def test_func():
         return 2 + 4
     """
-    logger = logging.getLogger('tropo') # change name to __name__
-    print(f.__module__, __name__)
+    logger = logging.getLogger(__name__) 
+   
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs):
         # Get memory usage

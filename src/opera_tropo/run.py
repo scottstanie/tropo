@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import psutil
 import logging
 import numpy as np
 import xarray as xr
@@ -70,6 +71,7 @@ def tropo(file_path: str,
     - ValueError: If the input dataset file cannot be opened.
 
     """
+    process = psutil.Process()
     logger.info("Calculating TROPO delay")    
     # Set default compression options if not provided
     compression_defaults = {
@@ -115,12 +117,18 @@ def tropo(file_path: str,
     # Get output size
     cols = ds.sizes.get('latitude')
     rows = ds.sizes.get('longitude')
-    if len(out_heights) > 0:
+    
+    
+    if out_heights is not None and len(out_heights) > 0:
         zlevels = np.array(out_heights)
     else:
         zlevels = np.flipud(LEVELS_137_HEIGHTS)
     out_size = np.empty((cols, rows, len(zlevels)),
                         dtype=np.float32)
+    
+    # To skip interpolation if out_heights are same as default
+    if np.array_equal(out_heights, np.flipud(LEVELS_137_HEIGHTS)):
+        out_heights = None
 
     # Get output template
     template = pack_ztd(
@@ -139,20 +147,23 @@ def tropo(file_path: str,
     # NOTE: Peak in RAM is 40GB after ingesting map_block output
     # with default 145 height level, specifying out_heights can
     # lower mem usage 
-    logger.info("Estimating ZTD delay")
+    mem = process.memory_info().rss / 1e6 
+    logger.info(f"Estimating ZTD delay, mem usage {mem:.2f} GB")
     t1 = time.time()
     out_ds = ds.map_blocks(calculate_ztd,
                 kwargs={'out_heights': out_heights}, 
                         template=template).compute()
     t2 = time.time()
+    mem = process.memory_info().rss / 1e6 
     logger.info(f"ZTD calculation took {t2 - t1:.2f} seconds.")
+    logger.info(f"Mem usage {mem:.2f} GB")
 
     # Clean up
     del template, ds 
 
     # Note, apply again rounding as interpolation can change
     # output, double check if needed
-    if len(out_heights)>0 & keep_bits:
+    if out_heights is not None and len(out_heights)>0 and keep_bits:
         # use one keep_bits setting, need to figure how to apply
         # different rounding for each data_var in xr.Dataset
         keep_bit_kwargs = {'keep_bits': TROPO_PRODUCTS.wet_delay.keep_bits}
@@ -166,4 +177,6 @@ def tropo(file_path: str,
     out_ds.to_netcdf(output_file, encoding=encoding, mode='w')
     t2 = time.time()
     logger.info(f"Saving {msg} took {t2 - t1:.2f} seconds.")
+    mem = process.memory_info().rss / 1e6
+    logger.info(f"Mem usage {mem:.2f} GB") 
     client.close()

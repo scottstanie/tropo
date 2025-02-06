@@ -76,7 +76,7 @@ def calculate_ztd(da: xr.Dataset, out_heights: list = [],
         del hres_model, longitude, latitude, h, pres, hgt
 
         # Interpolate
-        if len(out_heights) > 1:
+        if out_heights is not None and len(out_heights) > 1:
             ztd_xr = ztd_xr.interp(height=out_heights,
                                    method='cubic')
 

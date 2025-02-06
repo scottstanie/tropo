@@ -17,5 +17,6 @@ dependencies:
   - ruamel.yaml>=0.15
   - yamale
   - xarray
+  - pytest
   # RAiDER Base
-  - raider-base>=0.5.3
+  - raider-base==0.5.3

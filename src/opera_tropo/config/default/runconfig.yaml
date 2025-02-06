@@ -1,12 +1,12 @@
 input_options:
   # REQUIRED: path to HRES model file.
   #   Type: string | Path.
-  input_file_path: /u/trappist-r0/govorcin/01_OPERA/HRES/data/D01010000010100001.subset.zz.nc 
+  input_file_path: input_data/D01010000010100001.zz.nc 
 
 worker_settings:
   # Number of workers to run in parallel 
   #   Type: integer.
-  n_workers: 5
+  n_workers: 4
   # Number of threads to use per worker.
   #   Type: integer.
   threads_per_worker: 2
@@ -42,4 +42,4 @@ output_options:
 
 # Path to the output log file in addition to logging to stderr.
 #   Type: string | null.
-log_file: /u/trappist-r0/govorcin/01_OPERA/HRES/tropo/log_sas.log
+log_file: log_sas.log
