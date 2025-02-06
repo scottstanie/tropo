@@ -29,19 +29,22 @@ jobs:
 
       - name: Build the Docker image
         run: |
+          IMAGE_TAG="ghcr.io/${{ github.repository_owner }}/opera_tropo"
+          VERSION_TAG="${GITHUB_REF##*/}" # Extract the version from the tag or branch name
+          
           docker build --network=host \
-            --tag ghcr.io/${{ github.repository_owner }}/opera_tropo:latest \
+            --tag ${IMAGE_TAG}:${VERSION_TAG} 
             --file=docker/Dockerfile .
 
       - name: Run a smoke test
         run: |
-          docker run --rm ghcr.io/${{ github.repository_owner }}/opera_tropo:latest opera_tropo run --help
+          docker run --rm ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG} opera_tropo run --help
 
       - name: Push the Docker image to GHCR
-        run: docker push ghcr.io/${{ github.repository_owner }}/opera_tropo:latest
+        run: docker push ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG}
 
       - name: Print download command
         run: |
           echo "✅ Docker image published!"
           echo "To pull the image, run:"
-          echo "docker pull ghcr.io/${{ github.repository_owner }}/opera_tropo:latest"
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/opera_tropo:${VERSION_TAG}"
