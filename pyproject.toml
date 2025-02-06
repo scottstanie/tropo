@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "opera_tropo"
 description = "OPERA global troposphere correction workflows"
 readme = { file = "README.md", content-type = "text/markdown" }
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
@@ -23,8 +23,8 @@ license = { file = "LICENSE.txt" }
 dynamic = ["version", "dependencies", "optional-dependencies"]
 
 [project.urls]
-Homepage = "https://github.com/opera-adt/opera_tropo"
-"Bug Tracker" = "https://github.com/opera-adt/opera_tropo/issues"
+Homepage = "https://github.com/opera-adt/tropo"
+"Bug Tracker" = "https://github.com/opera-adt/tropo/issues"
 
 # Entry points for the command line interface
 [project.scripts]
@@ -33,9 +33,7 @@ opera_tropo = "opera_tropo.cli:cli_app"
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 
-# extra requirements: `pip install opera_tropo[docs]` or `pip install .[docs]`
-[tool.setuptools.dynamic.optional-dependencies.docs]
-file = ["docs/requirements.txt"]
+# extra requirements: `pip install tropo[docs]` or `pip install .[docs]`
 [tool.setuptools.dynamic.optional-dependencies.test]
 file = ["tests/requirements.txt"]
 
@@ -97,6 +95,7 @@ doctest_optionflags = "NORMALIZE_WHITESPACE NUMBER"
 filterwarnings = [
   "error",
   # DeprecationWarning thrown in pkg_resources for older numba verions and llvmlite
+  # DeprecationWarning for raider cgi
   "ignore:.*pkg_resources.*",
   "ignore::DeprecationWarning",
   "ignore:h5py is running against HDF5.*:UserWarning",

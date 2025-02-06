@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
+import numpy as np
 
 from pydantic import (
     BaseModel,
@@ -25,9 +26,9 @@ __all__ = [
 
 PRODUCT_VERSION = '0.1'
 DEFAULT_ENCODING_OPTIONS = {
-        "compression_flag": False, # run
+        "compression_flag": True,
         "zlib": True,
-        "complevel": 4,
+        "complevel": 5,
         "shuffle": True
         }
 
@@ -78,7 +79,7 @@ class OutputOptions(BaseModel, extra="forbid"):
         description="Time the config file was created",
     )
 
-    output_heights: Optional[list] = Field(
+    output_heights: Optional[List[float]] = Field(
         default_factory=list,
         description=("Output height level to hydrostatic and wet delay"
                      " default:  RAiDER HRES 145 height levels."),
@@ -109,28 +110,28 @@ class OutputOptions(BaseModel, extra="forbid"):
 class WorkerSettings(BaseModel, extra="forbid"):
     """Settings for controlling CPU settings and parallelism."""
     n_workers: int = Field(
-        1,
+        4,
         ge=1,
         description=(
             "Number of workers to use in dask.Client."
         ), 
     )
     threads_per_worker: int = Field(
-        1,
+        2,
         ge=1,
         description=(
             "Number of threads to use per worker in dask.Client"
         ),
     )
     max_memory: int = Field(
-        default=4,
-        ge=4,
+        default=8,
+        ge=2,
         description=(
             "Workers are given a target memory limit in dask.Client"
         ),
     )
     dask_temp_dir: str | Path = Field(
-        None,
+        'tmp',
         description=(
             "Dask local spill directory."
         ),

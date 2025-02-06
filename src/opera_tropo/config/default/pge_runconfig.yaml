@@ -1,7 +1,7 @@
 input_file:
   # REQUIRED: path to HRES model file.
   #   Type: string | Path.
-  input_file_path: /u/trappist-r0/govorcin/01_OPERA/HRES/data/D01010000010100001.subset.zz.nc
+  input_file_path: input_data/D01010000010100001.zz.nc
 
 
 primary_executable:
@@ -16,7 +16,7 @@ product_path_group:
   product_path: output/historical
   # Path to the scratch directory.
   #   Type: string.
-  scratch_path: /u/trappist-r0/govorcin/01_OPERA/HRES/data/scratch
+  scratch_path: golden_output
   # Path to the SAS output directory.
   #   Type: string.
   sas_output_path: output/historical
@@ -35,7 +35,7 @@ worker_settings:
   threads_per_worker: 2
   # Max memory to use per worker in GB. 
   #   Type: integer.
-  max_memory: 4
+  max_memory: 8
   # Dask local spill directory 
   #   Type: string.
   dask_temp_dir: tmp
@@ -49,16 +49,7 @@ worker_settings:
 output_options:
   # Output height levels for ZTD, if empty use default HRES 145 levels.
   #   Type: list.
-  output_heights:
-    - -500
-    - 0
-    - 500
-    - 1000
-    - 2000
-    - 5000
-    - 10000
-    - 15000
-    - 20000
+  output_heights: []
   # Level of compression applied to netcdf
   #   Type: dict.
   compression_kwargs:
@@ -66,12 +57,8 @@ output_options:
     zlib: true
     complevel: 5
     shuffle: true
-  # Chunk size of netcdf
-  #   Type: array.
-  #chunk_size: 
-  #  - 256
-  #  - 128
+
 
 # Path to the output log file in addition to logging to stderr.
 #   Type: string | null.
-log_file: /u/trappist-r0/govorcin/01_OPERA/HRES/data/scratch/log_sas.log
+log_file: golden_output/log_sas.log

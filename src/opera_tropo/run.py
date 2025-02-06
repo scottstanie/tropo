@@ -117,12 +117,18 @@ def tropo(file_path: str,
     # Get output size
     cols = ds.sizes.get('latitude')
     rows = ds.sizes.get('longitude')
+    
+    
     if out_heights is not None and len(out_heights) > 0:
         zlevels = np.array(out_heights)
     else:
         zlevels = np.flipud(LEVELS_137_HEIGHTS)
     out_size = np.empty((cols, rows, len(zlevels)),
                         dtype=np.float32)
+    
+    # To skip interpolation if out_heights are same as default
+    if np.array_equal(out_heights, np.flipud(LEVELS_137_HEIGHTS)):
+        out_heights = None
 
     # Get output template
     template = pack_ztd(
@@ -157,7 +163,7 @@ def tropo(file_path: str,
 
     # Note, apply again rounding as interpolation can change
     # output, double check if needed
-    if len(out_heights)>0 & keep_bits:
+    if out_heights is not None & len(out_heights)>0 & keep_bits:
         # use one keep_bits setting, need to figure how to apply
         # different rounding for each data_var in xr.Dataset
         keep_bit_kwargs = {'keep_bits': TROPO_PRODUCTS.wet_delay.keep_bits}

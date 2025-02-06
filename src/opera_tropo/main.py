@@ -36,7 +36,8 @@ def run(
     """
 
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
-    setup_logging(logger_name="RAiDER", filename=cfg.log_file)    
+    setup_logging(logger_name="RAiDER",  debug=debug, filename=cfg.log_file)
+    setup_logging(logger_name="dask",  debug=debug, filename=cfg.log_file)       
 
     #Save the start for a metadata field
     #processing_start_datetime = datetime.now(timezone.utc)
