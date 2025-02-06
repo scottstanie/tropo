@@ -38,8 +38,9 @@ jobs:
             # Remove the leading 'v' if it's present
             VERSION_TAG="${VERSION_TAG#v}"
           else
-            VERSION_TAG="${GITHUB_REF##*/}"  # Default fallback (if needed for branches)
+            #VERSION_TAG="${GITHUB_REF##*/}"  # Default fallback (if needed for branches)
             # Optionally, you could handle branch versions differently here
+            VERSION_TAG=0.0.1
           fi
 
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
