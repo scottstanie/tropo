@@ -59,6 +59,11 @@ jobs:
         run: |
           docker push ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }}
 
+      - name: Save Docker image to a tar file
+        run: |
+          # Save the Docker image as a tar file
+          docker save ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} > tropo_${{ env.VERSION_TAG }}.tar
+
       - name: Print download command
         run: |
           echo "✅ Docker image published!"
