@@ -6,7 +6,7 @@ import click
 from cmap import Colormap
 
 from opera_tropo.browse_image import DEFAULT_CMAP
-print(DEFAULT_CMAP)
+
 # Always show defaults
 click.option = functools.partial(click.option, show_default=True)
 
