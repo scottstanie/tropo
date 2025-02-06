@@ -65,6 +65,13 @@ jobs:
           # Save the Docker image as a tar file
           docker save ${{ env.IMAGE_TAG }}:${{ env.VERSION_TAG }} > tropo_${{ env.VERSION_TAG }}.tar
 
+      - name: Upload Docker image tarball as artifact
+        if: ${{ env.VERSION_TAG != '' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-image-${{ env.VERSION_TAG }}.tar
+          path: ${{ env.VERSION_TAG }}.tar
+
       - name: Print download command
         run: |
           echo "✅ Docker image published!"
