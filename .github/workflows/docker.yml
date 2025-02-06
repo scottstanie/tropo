@@ -38,7 +38,7 @@ jobs:
             # Remove the leading 'v' if it's present
             VERSION_TAG="${VERSION_TAG#v}"
           else
-            VERSION_TAG=""  # Set to empty or fallback if it's not a tag
+            VERSION_TAG="0.0.1"  # Set to empty or fallback if it's not a tag
             echo "Not a tag push, using empty VERSION_TAG"
           fi
 
