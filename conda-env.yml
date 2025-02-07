@@ -12,6 +12,7 @@ dependencies:
   - numpy
   - scipy
   - cmap
+  - pre_commit
   - matplotlib-base
   - pydantic>=2.1
   - ruamel.yaml>=0.15

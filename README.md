@@ -26,24 +26,35 @@ python -m pip install --no-deps -e  opera_tropo
 
 ### Usage
 
-There are 4 entrypoints for the OPERA-TROPO workflow
+There are 5 entrypoints for the OPERA-TROPO workflow
 
 1. Download HRES model *.nc from s3 bucket to local directory
 ```bash
-opera_tropo download -s3 "bucket_path" --date 20190613 --hour 00
+opera_tropo download -s3 "bucket_path" --date 20190613 --hour 06
 ```
 2. Run troposphere phase delay estimation, require configuration file
    default configs can be found in opera_tropo/config/default
 ```bash
-opera_tropo run pge_runconfig.yaml
-```
-3. Make browser image
-```bash
-opera_tropo make-browse -i OPERA_L4_TROPO_GLOBAL_20190101T000000Z_20250130T232942Z_HRES_0.1_v0.1.nc
+opera_tropo config -input input_data/D06130600061306001.zz.nc -out output/ -c runconfig.yaml
 ```
 
-4. Validate 
-TODO
+3. Run troposphere phase delay estimation, require configuration file
+   default configs can be found in opera_tropo/config/default
+   NOTE: processing datetime is changing for each output filename
+```bash
+opera_tropo run runconfig.yaml
+```
+
+4. Make browser image. NOTE. browse-image is created druing run routine
+   Default height level 800m, plot image at different level
+```bash
+opera_tropo make-browse -i OPERA_L4_TROPO_GLOBAL_20190101T000000Z_20250130T232942Z_HRES_0.1_v0.1.nc --height 100
+```
+
+4. Validate: golden_dataset vs output. 
+```bash
+opera_tropo validate OPERA_L4_TROPO_20190613T060000Z_20250206T182940Z_HRES_0.1_v0.1.nc output/OPERA_L4_TROPO_20190613T060000Z_20250206T201820Z_HRES_0.1_v0.1.nc
+```
 
 ### Setup for contributing
 
@@ -83,3 +94,8 @@ To build the docker image, run:
 docker build -f Dockerfile -t opera_tropo .
 ```
 which will print out instructions for running the image.
+
+or
+```bash
+./docker/build-docker-image.sh --tag my-tag
+```
