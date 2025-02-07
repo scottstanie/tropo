@@ -51,7 +51,7 @@ opera_tropo run runconfig.yaml
 opera_tropo make-browse -i OPERA_L4_TROPO_GLOBAL_20190101T000000Z_20250130T232942Z_HRES_0.1_v0.1.nc --height 100
 ```
 
-4. Validate: golden_dataset vs output. 
+5. Validate: golden_dataset vs output. 
 ```bash
 opera_tropo validate OPERA_L4_TROPO_20190613T060000Z_20250206T182940Z_HRES_0.1_v0.1.nc output/OPERA_L4_TROPO_20190613T060000Z_20250206T201820Z_HRES_0.1_v0.1.nc
 ```
