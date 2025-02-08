@@ -34,7 +34,7 @@ ARG CONDA_GID=1000
 
 RUN groupadd -g "${CONDA_GID}" --system tropo_user && \
     useradd -l -u "${CONDA_UID}" -g "${CONDA_GID}" --system -d /home/ops -m  -s /bin/bash tropo_user && \
-    chown -R tropo_user:tropo_user /opt
+    chown -R tropo_user:tropo_user /home/ops /opt
 
 USER ${CONDA_UID}
 WORKDIR /home/ops
@@ -45,7 +45,8 @@ COPY --chown=tropo_user:tropo_user conda-env.yml /home/ops/opera_tropo/conda-env
 COPY --chown=tropo_user:tropo_user . /home/ops/opera_tropo
 
 # Ensure all files are read/write by the user
-RUN chmod -R 777 /home/ops
+RUN chown -R tropo_user:tropo_user /home/ops && chmod -R 777 /home/ops
+
 
 # Create the environment with mamba
 RUN mamba env create -f /home/ops/opera_tropo/conda-env.yml && \

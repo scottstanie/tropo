@@ -14,14 +14,14 @@ git clone https://github.com/opera-adt/opera_tropo.git
 ```
 2. Install dependencies, either to a new environment:
 ```bash
-mamba env create --name opera_tropo --file opera_tropo/conda-env.yml
+mamba env create --name opera_tropo --file tropo/conda-env.yml
 conda activate opera_tropo 
 ```
 or install within your existing env with mamba.
 
-3. Install `opera_tropo` via pip in editable mode
+3. Install `tropo` via pip in editable mode
 ```bash
-python -m pip install --no-deps -e  opera_tropo
+python -m pip install --no-deps -e  tropo
 ```
 
 ### Usage
@@ -51,7 +51,7 @@ opera_tropo run runconfig.yaml
 opera_tropo make-browse -i OPERA_L4_TROPO_GLOBAL_20190101T000000Z_20250130T232942Z_HRES_0.1_v0.1.nc --height 100
 ```
 
-4. Validate: golden_dataset vs output. 
+5. Validate: golden_dataset vs output. 
 ```bash
 opera_tropo validate OPERA_L4_TROPO_20190613T060000Z_20250206T182940Z_HRES_0.1_v0.1.nc output/OPERA_L4_TROPO_20190613T060000Z_20250206T201820Z_HRES_0.1_v0.1.nc
 ```
