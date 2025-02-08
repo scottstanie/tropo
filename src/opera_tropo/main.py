@@ -42,6 +42,7 @@ def run(
     #Save the start for a metadata field
     #processing_start_datetime = datetime.now(timezone.utc)
     cfg.work_directory.mkdir(exist_ok=True, parents=True)
+    cfg.output_directory.mkdir(exist_ok=True, parents=True)
 
     # Get output filename
     hres_date, hres_hour = get_hres_datetime(cfg.input_options.input_file_path)
@@ -49,7 +50,7 @@ def run(
 
     # Run dolphin's displacement workflow
     tropo(file_path = cfg.input_options.input_file_path,
-          output_file = Path(cfg.work_directory) / output_filename,
+          output_file = Path(cfg.output_directory) / output_filename,
           out_heights = cfg.output_options.output_heights,
           lat_chunk_size = cfg.worker_settings.block_shape[0],
           lon_chunk_size = cfg.worker_settings.block_shape[1],

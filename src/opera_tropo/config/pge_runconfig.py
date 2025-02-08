@@ -57,7 +57,7 @@ class ProductPathGroup(YamlModel):
         default=Path("./scratch"),
         description="Path to the scratch directory.",
     )
-    output_directory: Path = Field(
+    output_path: Path = Field(
         default=Path("./output"),
         description="Path to the SAS output directory.",
         # The alias means that in the YAML file, the key will be "sas_output_path"
@@ -115,6 +115,7 @@ class RunConfig(YamlModel):
 
         #input_file = (self.input_file_group.input_file_group.input_file_path
         scratch_directory = self.product_path_group.scratch_path
+        output_directory = self.product_path_group.output_path
         tmp_directory = Path(scratch_directory) / 'tmp'
         tmp_directory.mkdir(parents=True, exist_ok=True)
         worker_settings = self.worker_settings.copy()
@@ -126,6 +127,7 @@ class RunConfig(YamlModel):
             input_options=self.input_file.__dict__,
             output_options=output_options.__dict__,
             work_directory=scratch_directory,
+            output_directory=output_directory,
             # These ones directly translate
             worker_settings=worker_settings.__dict__,
             log_file=self.log_file,

@@ -14,14 +14,14 @@ git clone https://github.com/opera-adt/opera_tropo.git
 ```
 2. Install dependencies, either to a new environment:
 ```bash
-mamba env create --name opera_tropo --file opera_tropo/conda-env.yml
+mamba env create --name opera_tropo --file tropo/conda-env.yml
 conda activate opera_tropo 
 ```
 or install within your existing env with mamba.
 
-3. Install `opera_tropo` via pip in editable mode
+3. Install `tropo` via pip in editable mode
 ```bash
-python -m pip install --no-deps -e  opera_tropo
+python -m pip install --no-deps -e  tropo
 ```
 
 ### Usage

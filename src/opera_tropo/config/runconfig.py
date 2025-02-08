@@ -151,6 +151,11 @@ class WorkflowBase(YamlModel):
 
     work_directory: Path = Field(
         Path(),
+        description="Name of directory to use for processing",
+        validate_default=True,
+    )
+    output_directory: Path = Field(
+        Path(),
         description="Name of directory to use for writing output files",
         validate_default=True,
     )
