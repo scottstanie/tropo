@@ -1,6 +1,5 @@
 import json
 import time
-import psutil
 import os
 import sys
 import logging
@@ -35,8 +34,7 @@ def setup_logging(*, logger_name: str = "opera_tropo", debug: bool = False, file
     if filename:
         if "file" not in config["loggers"][logger_name]["handlers"]:
             config["loggers"][logger_name]["handlers"].append("file")
-        config["handlers"]["file"]["filename"] = os.fspath(filename)
-        print(config["handlers"]["file"]["filename"] )
+        config["handlers"]["file"]["filename"] = os.fspath(filename) 
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
 
     if "filename" not in config["handlers"]["file"]:
@@ -57,10 +55,6 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
    
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs):
-        # Get memory usage
-        process = psutil.Process()
-        memory_before = process.memory_info().rss / 1e6
-
         t1 = time.time()
 
         result = f(*args, **kwargs)
@@ -69,21 +63,13 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
         elapsed_seconds = t2 - t1
         elapsed_minutes = elapsed_seconds / 60.0
 
-        # Get memory usage after function call
-        memory_after = process.memory_info().rss / 1e6 
 
         time_string = (
             f"Total elapsed time for {f.__module__}.{f.__name__}: "
             f"{elapsed_minutes:.2f} minutes ({elapsed_seconds:.2f} seconds)"
         )   
 
-        memory_string = (
-            f" Memory before: {memory_before:.2f} MB, "
-            f" after: {memory_after:.2f} MB, "
-            f" total: {memory_after - memory_before:.2f} MB" 
-        )
-
-        logger.info(time_string + '\n' + memory_string)
+        logger.info(time_string)
 
         return result
 

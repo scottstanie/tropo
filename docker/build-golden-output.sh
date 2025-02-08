@@ -15,3 +15,14 @@ opera_tropo config -input input_data/D06130600061306001.zz.nc -out golden_output
 
 # Step 4: Run the opera_tropo process
 opera_tropo run "$CONFIG_FILE"
+
+# Step 5: Rename the output files
+for file in golden_output/*.nc; do
+    timestamp=$(basename "$file" | sed -E 's/.*([0-9]{8}T[0-9]{2}).*/\1/')
+    mv "$file" "golden_output/golden_output_$(basename "$file" .nc).nc"
+done
+
+for file in golden_output/*.png; do
+    timestamp=$(basename "$file" | sed -E 's/.*([0-9]{8}T[0-9]{2}).*/\1/')
+    mv "$file" "golden_output/golden_output_$(basename "$file" .png).png"
+done
