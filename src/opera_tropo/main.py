@@ -1,12 +1,13 @@
-###### DEVELOPEMENT STAGE ############
 from __future__ import annotations
 
+import os
 import logging
 from pathlib import Path
 from datetime import datetime, timezone
 logger = logging.getLogger(__name__)
 
 import RAiDER
+from RAiDER.logger import logger as raider_log
 
 from .run import tropo 
 from .utils import get_hres_datetime, get_max_memory_usage
@@ -36,30 +37,38 @@ def run(
     """
 
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
-    setup_logging(logger_name="RAiDER",  debug=debug, filename=cfg.log_file)
-    setup_logging(logger_name="dask",  debug=debug, filename=cfg.log_file)       
 
     #Save the start for a metadata field
     #processing_start_datetime = datetime.now(timezone.utc)
     cfg.work_directory.mkdir(exist_ok=True, parents=True)
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
-
+    
+    # Change to work directory
+    logger.debug(f'Work directory: {cfg.work_directory}')
+    os.chdir(cfg.work_directory)
+    
     # Get output filename
     hres_date, hres_hour = get_hres_datetime(cfg.input_options.input_file_path)
     output_filename = cfg.output_options.get_output_filename(hres_date, hres_hour)
 
-    # Run dolphin's displacement workflow
+    # Run troposphere workflow
     tropo(file_path = cfg.input_options.input_file_path,
           output_file = Path(cfg.output_directory) / output_filename,
+          max_height= cfg.output_options.max_height, 
           out_heights = cfg.output_options.output_heights,
-          lat_chunk_size = cfg.worker_settings.block_shape[0],
-          lon_chunk_size = cfg.worker_settings.block_shape[1],
+          out_chunk_size = cfg.output_options.chunk_size,
+          block_size = cfg.worker_settings.block_shape,
           num_workers = cfg.worker_settings.n_workers,
           num_threads = cfg.worker_settings.threads_per_worker,
           max_memory = cfg.worker_settings.max_memory,
           compression_options = cfg.output_options.compression_kwargs,
           temp_dir = cfg.worker_settings.dask_temp_dir
          )
+
+    # Remove RAIDER empty log files
+    for handler in raider_log.handlers:
+        if isinstance(handler, logging.FileHandler):
+            Path(handler.baseFilename).unlink(missing_ok=True)
 
     # Generate output browse image
     logger.info(f"Output file: {Path(cfg.output_directory) / output_filename}")
@@ -72,5 +81,5 @@ def run(
     logger.info(f"Product version: {pge_runconfig.product_path_group.product_version}")
     max_mem = get_max_memory_usage(units="GB")
     logger.info(f"Maximum memory usage: {max_mem:.2f} GB")
-    logger.info(f"Config file RAIDER version: {RAiDER.__version__}")
+    logger.info(f"RAIDER version: {RAiDER.__version__}")
     logger.info(f"Current running opera_tropo version: {__version__}")

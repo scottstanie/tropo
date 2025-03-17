@@ -29,15 +29,14 @@ def pack_ztd(wet_ztd: np.ndarray, hydrostatic_ztd: np.ndarray,
     - ds (xarray.Dataset): Packaged ZTD data.
     """
 
-    dim = ["latitude", "longitude", "height"]
+    dim = ["height", "latitude", "longitude"]
     reference_time = model_time.astype('datetime64[s]').astype('O')[0]
     reference_time = reference_time.strftime('%Y-%m-%d %H:%M:%S')   
 
-    #zenith_delay = hydrostatic_ztd + wet_ztd 
+    #total_zenith_delay = hydrostatic_ztd + wet_ztd 
     wet_ztd = wet_ztd.astype(TROPO_PRODUCTS.wet_delay.dtype)
-    hydrostatic_ztd = hydrostatic_ztd.astype(TROPO_PRODUCTS.hydrostatic_delay.dtype) 
-    
-    zs = zs.astype('float32')
+    hydrostatic_ztd = hydrostatic_ztd.astype(TROPO_PRODUCTS.hydrostatic_delay.dtype)  
+    zs = zs.astype('float64')
 
     # Rounding
     if keep_bits:
@@ -50,13 +49,17 @@ def pack_ztd(wet_ztd: np.ndarray, hydrostatic_ztd: np.ndarray,
     
     ds = xr.Dataset(
         data_vars=dict(
-            wet_delay=(dim, wet_ztd,
+            wet_delay=(dim, wet_ztd.transpose(2, 0, 1),
                        TROPO_PRODUCTS.wet_delay.to_dict()),
-            hydrostatic_delay=(dim, hydrostatic_ztd,
+            hydrostatic_delay=(dim, hydrostatic_ztd.transpose(2, 0, 1),
                                TROPO_PRODUCTS.hydrostatic_delay.to_dict()), 
         ),
 
-        coords=dict(longitude=lons, latitude=lats, height=zs),
+        # normalizing longitudes to the range [-180, 180] from [0, 360]
+        # GDAL expects coordinates to be float64
+        coords=dict(height=zs,
+                    latitude=np.float64(lats),
+                    longitude=(np.float64(lons) + 180) % 360 - 180), 
         attrs=GLOBAL_ATTRS | {"reference_time": reference_time}
     )
 
@@ -83,7 +86,7 @@ def pack_ztd(wet_ztd: np.ndarray, hydrostatic_ztd: np.ndarray,
 
     # Add chunks to data variables
     if chunk_size is not None:
-        for key in ["wet_delay", "hydrostatic_delay"]:#, "zenith_total_delay"]:
+        for key in ["wet_delay", "hydrostatic_delay"]:
             ds[key] = ds[key].chunk(chunk_size)
 
         # Ensure that chunking is applied to the entire dataset
