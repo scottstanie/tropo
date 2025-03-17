@@ -4,7 +4,7 @@ from pathlib import Path
 import click
 
 from opera_tropo.config import pge_runconfig
-
+from RAiDER.models.model_levels import LEVELS_137_HEIGHTS
 click.option = functools.partial(click.option, show_default=True)
 
 
@@ -12,9 +12,9 @@ def create_config(
     input_file: str | Path,
     output_dir: str | Path,
     config_path: str | Path = "./runconfig.yaml",
-    height_levels: list[float] = LEVELS_137_HEIGHTS, 
-    n_workers: int = 4, 
-    n_threads: int = 2,  
+    height_levels: list[float] = LEVELS_137_HEIGHTS,
+    n_workers: int = 4,
+    n_threads: int = 2,
     worker_memory: int = 8,
     block_shape: tuple[int, int] = (128, 128), 
     log_file: str = "tropo_run.log"
@@ -62,21 +62,21 @@ def create_config(
     help="Directory for output files"
 )
 @click.option(
-    "--height-levels", 
-    "-hlevels", 
-    type=list, 
-    default=np.flipud(LEVELS_137_HEIGHTS).tolist(), 
+    "--height-levels",
+    "-hlevels",
+    type=list,
+    default=np.flipud(LEVELS_137_HEIGHTS).tolist(),
     help="List of height levels for output"
 )
 @click.option(
-    "--worker-settings", 
-    type=(int, int, int), 
+    "--worker-settings",
+    type=(int, int, int),
     default=(4, 2, 8),
     help="Worker settings: (n_workers, n_threads, worker_memory)"
 )
 @click.option(
-    "--chunks", 
-    type=(int, int), 
+    "--chunks",
+    type=(int, int),
     default=(128, 128),
     help="Block shape for worker processing"
 )
@@ -86,8 +86,8 @@ def run_create_config(
     tropo_input: Path,
     tropo_output: Path,
     height_levels: list[float],
-    worker_settings: tuple[int, int, int], 
-    chunks: tuple[int, int], 
+    worker_settings: tuple[int, int, int],
+    chunks: tuple[int, int],
     log: str
 ) -> None:
     """CLI wrapper to create a tropospheric runconfig file."""
@@ -98,7 +98,7 @@ def run_create_config(
         max_height=max_height,
         n_workers=worker_settings[0],
         n_threads=worker_settings[1],
-        worker_memory=worker_settings[2],
+        worker_memory=f'{worker_settings[2]}GB',
         block_shape=chunks,
         log_file=log,
     )

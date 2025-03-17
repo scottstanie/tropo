@@ -6,7 +6,10 @@ from pydantic import ConfigDict, Field
 from ._yaml import YamlModel
 from .runconfig import InputOptions, OutputOptions, TropoWorkflow, WorkerSettings
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> Update Product spec (#3)
 class PrimaryExecutable(YamlModel):
     """Group describing the primary executable."""
 

@@ -98,7 +98,7 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
         time_string = (
             f"Total elapsed time for {f.__module__}.{f.__name__}: "
             f"{elapsed_minutes:.2f} minutes ({elapsed_seconds:.2f} seconds)"
-        )
+        ) 
 
         logger.debug(time_string)
 

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import time
+import shutil
+import psutil
 import logging
 import shutil
 import time
@@ -13,7 +16,6 @@ from dask.distributed import Client
 
 from ._pack import pack_ztd
 from .checks import validate_input
-from .core import calculate_ztd
 from .core import calculate_ztd
 from .log.loggin_setup import log_runtime
 from .product_info import TROPO_PRODUCTS
@@ -158,14 +160,16 @@ def tropo(
     logger.debug(f"Chunk sizes: {chunksizes}")
 
     # Get output size
-    cols = ds.sizes.get("latitude")
-    rows = ds.sizes.get("longitude")
+    cols = ds.sizes.get('latitude')
+    rows = ds.sizes.get('longitude')
 
     if out_heights is not None and len(out_heights) > 0:
         zlevels = np.array(out_heights)
     else:
         zlevels = np.flipud(LEVELS_137_HEIGHTS)
-    out_size = np.empty((cols, rows, len(zlevels)), dtype=np.float32)
+
+    out_size = np.empty((cols, rows, len(zlevels)),
+                         dtype=np.float32)
 
     # To skip interpolation if out_heights are same as default
     if np.array_equal(out_heights, np.flipud(LEVELS_137_HEIGHTS)):

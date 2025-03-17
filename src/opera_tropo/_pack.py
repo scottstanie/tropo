@@ -35,37 +35,38 @@ def pack_ztd(
     - ds (xarray.Dataset): Packaged ZTD data.
 
     """
-    dim = ["latitude", "longitude", "height"]
-    reference_time = model_time.astype("datetime64[s]").astype("O")[0]
-    reference_time = reference_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    # zenith_delay = hydrostatic_ztd + wet_ztd
+    dim = ["height", "latitude", "longitude"]
+    reference_time = model_time.astype('datetime64[s]').astype('O')[0]
+    reference_time = reference_time.strftime('%Y-%m-%d %H:%M:%S')
+
+    #total_zenith_delay = hydrostatic_ztd + wet_ztd
     wet_ztd = wet_ztd.astype(TROPO_PRODUCTS.wet_delay.dtype)
     hydrostatic_ztd = hydrostatic_ztd.astype(TROPO_PRODUCTS.hydrostatic_delay.dtype)
-
-    zs = zs.astype("float32")
+    zs = zs.astype('float64')
 
     # Rounding
     if keep_bits:
         if TROPO_PRODUCTS.wet_delay.keep_bits:
             round_mantissa(wet_ztd, keep_bits=int(TROPO_PRODUCTS.wet_delay.keep_bits))
         if TROPO_PRODUCTS.hydrostatic_delay.keep_bits:
-            round_mantissa(
-                hydrostatic_ztd,
-                keep_bits=int(TROPO_PRODUCTS.hydrostatic_delay.keep_bits),
-            )
+            round_mantissa(hydrostatic_ztd,
+                            keep_bits=int(TROPO_PRODUCTS.hydrostatic_delay.keep_bits))
 
     ds = xr.Dataset(
-        data_vars={
-            "wet_delay": (dim, wet_ztd, TROPO_PRODUCTS.wet_delay.to_dict()),
-            "hydrostatic_delay": (
-                dim,
-                hydrostatic_ztd,
-                TROPO_PRODUCTS.hydrostatic_delay.to_dict(),
-            ),
-        },
-        coords={"longitude": lons, "latitude": lats, "height": zs},
-        attrs=GLOBAL_ATTRS | {"reference_time": reference_time},
+        data_vars=dict(
+            wet_delay=(dim, wet_ztd.transpose(2, 0, 1),
+                       TROPO_PRODUCTS.wet_delay.to_dict()),
+            hydrostatic_delay=(dim, hydrostatic_ztd.transpose(2, 0, 1),
+                               TROPO_PRODUCTS.hydrostatic_delay.to_dict()), 
+        ),
+
+        # normalizing longitudes to the range [-180, 180] from [0, 360]
+        # GDAL expects coordinates to be float64
+        coords=dict(height=zs,
+                    latitude=np.float64(lats),
+                    longitude=(np.float64(lons) + 180) % 360 - 180), 
+        attrs=GLOBAL_ATTRS | {"reference_time": reference_time}
     )
 
     # Add coords attrs
@@ -91,7 +92,7 @@ def pack_ztd(
 
     # Add chunks to data variables
     if chunk_size is not None:
-        for key in ["wet_delay", "hydrostatic_delay"]:  # , "zenith_total_delay"]:
+        for key in ["wet_delay", "hydrostatic_delay"]:
             ds[key] = ds[key].chunk(chunk_size)
 
         # Ensure that chunking is applied to the entire dataset

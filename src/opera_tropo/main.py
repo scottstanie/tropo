@@ -49,19 +49,21 @@ def run(
     """
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)  # type: ignore
 
-    setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
-
     # Save the start for a metadata field
     # processing_start_datetime = datetime.now(timezone.utc)
     cfg.work_directory.mkdir(exist_ok=True, parents=True)
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
-    
+
     # Change to work directory
     logger.debug(f'Work directory: {cfg.work_directory}')
     os.chdir(cfg.work_directory)
-    
+
     # Change to work directory
     logger.debug(f"Work directory: {cfg.work_directory}")
+    os.chdir(cfg.work_directory)
+
+    # Change to work directory
+    logger.debug(f'Work directory: {cfg.work_directory}')
     os.chdir(cfg.work_directory)
 
     # Get output filename
