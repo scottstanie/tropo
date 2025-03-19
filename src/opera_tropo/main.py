@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import logging
 import os
 from pathlib import Path
@@ -17,6 +18,15 @@ from opera_tropo.utils import get_hres_datetime, get_max_memory_usage
 # Logger setup
 logger = logging.getLogger(__name__)
 
+import RAiDER
+from RAiDER.logger import logger as raider_log
+
+from .run import tropo 
+from .utils import get_hres_datetime, get_max_memory_usage
+from .config import runconfig, pge_runconfig
+from .log.loggin_setup import setup_logging, log_runtime
+from  .browse_image import make_browse_image_from_nc
+from opera_tropo import __version__
 
 @log_runtime
 def run(
@@ -39,11 +49,17 @@ def run(
     """
     setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)  # type: ignore
 
+    setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)
+
     # Save the start for a metadata field
     # processing_start_datetime = datetime.now(timezone.utc)
     cfg.work_directory.mkdir(exist_ok=True, parents=True)
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
-
+    
+    # Change to work directory
+    logger.debug(f'Work directory: {cfg.work_directory}')
+    os.chdir(cfg.work_directory)
+    
     # Change to work directory
     logger.debug(f"Work directory: {cfg.work_directory}")
     os.chdir(cfg.work_directory)
@@ -66,6 +82,11 @@ def run(
         compression_options=cfg.output_options.compression_kwargs,  # type: ignore
         temp_dir=cfg.worker_settings.dask_temp_dir,  # type: ignore
     )
+
+    # Remove RAIDER empty log files
+    for handler in raider_log.handlers:
+        if isinstance(handler, logging.FileHandler):
+            Path(handler.baseFilename).unlink(missing_ok=True)
 
     # Remove RAIDER empty log files
     for handler in raider_log.handlers:

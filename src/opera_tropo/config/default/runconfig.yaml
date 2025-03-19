@@ -1,16 +1,16 @@
 input_options:
   # REQUIRED: path to HRES model file.
   #   Type: string | Path.
-  input_file_path: input_data/D01010000010100001.zz.nc 
+  input_file_path: input_data/D01010000010100001.zz.nc
 
 worker_settings:
-  # Number of workers to run in parallel 
+  # Number of workers to run in parallel
   #   Type: integer.
   n_workers: 4
   # Number of threads to use per worker.
   #   Type: integer.
   threads_per_worker: 2
-  # Max memory to use per worker in GB. 
+  # Max memory to use per worker in GB.
   #   Type: integer.
   max_memory: 16GB
   # Dask local spill directory 

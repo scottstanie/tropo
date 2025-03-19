@@ -9,9 +9,9 @@ mkdir -p delivery_data_tropo/golden_output
 cd delivery_data_tropo || exit 1
 opera_tropo download -o input_data -s3 opera-dev-lts-fwd-hyunlee --date 20190613 --hour 06
 
-# Step 3: Create configuration file 
+# Step 3: Create configuration file
 CONFIG_FILE="configs/runconfig_20190613_06.yaml"
-opera_tropo config -input input_data/D06130600061306001.zz.nc -out golden_output/ -c "$CONFIG_FILE" 
+opera_tropo config -input input_data/D06130600061306001.zz.nc -out golden_output/ -c "$CONFIG_FILE"
 
 # Step 4: Run the opera_tropo process
 opera_tropo run "$CONFIG_FILE"

@@ -49,6 +49,7 @@ class InputOptions(BaseModel, extra="forbid"):
     )
 
 
+
 class OutputOptions(BaseModel, extra="forbid"):
     """Options specifying input datasets for workflow."""
 
@@ -110,6 +111,7 @@ class OutputOptions(BaseModel, extra="forbid"):
 
         datetime_str = f"{date_time_str}Z_{proc_datetime}Z"
         return f"OPERA_L4_TROPO-ZENITH_{datetime_str}_HRES_v{self.product_version}.nc"
+
 
 
 class WorkerSettings(BaseModel, extra="forbid"):
