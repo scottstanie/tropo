@@ -84,10 +84,12 @@ def test_hres_class(load_hres_model, key):
 
     # Handle comparison if values are arrays or lists
     if isinstance(golden_value, np.ndarray) and isinstance(model_value, np.ndarray):
-        assert np.array_equal(
-            golden_value, model_value
-        ), f"Values for key '{key}' do not match: golden_dict = {golden_value}, model_dict = {model_value}"
+        assert np.array_equal(golden_value, model_value), (
+            f"Values for key '{key}' do not match: golden_dict = {golden_value},"
+            f" model_dict = {model_value}"
+        )
     else:
-        assert (
-            golden_value == model_value
-        ), f"Values for key '{key}' do not match: golden_dict = {golden_value}, model_dict = {model_value}"
+        assert golden_value == model_value, (
+            f"Values for key '{key}' do not match: golden_dict = {golden_value},"
+            f" model_dict = {model_value}"
+        )

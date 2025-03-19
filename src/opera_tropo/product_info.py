@@ -55,7 +55,7 @@ class TropoCoordAttrs:
             units="degrees_north",
             standard_name="latitude",
             long_name="latitude",
-            description=("Angular distance of a point north or south of the equator."),
+            description="Angular distance of a point north or south of the equator.",
             encoding={},
         )
     )
@@ -128,7 +128,7 @@ class TropoProducts:
         default_factory=lambda: ProductInfo(
             name="wet_delay",
             long_name="one way zenith wet delay",
-            description=("Zenith Wet Delay."),
+            description="Zenith Wet Delay.",
             fillvalue=np.nan,
             # Note sure should I keep grid_mapping here
             attrs={"units": "meters", "grid_mapping": "spatial_ref"},
@@ -143,7 +143,7 @@ class TropoProducts:
         default_factory=lambda: ProductInfo(
             name="hydrostatic_delay",
             long_name="one way zenith hydrostatic delay",
-            description=("Zenith Wet Delay."),
+            description="Zenith Wet Delay.",
             fillvalue=np.nan,
             # Note sure should I keep grid_mapping here
             attrs={"units": "meters", "grid_mapping": "spatial_ref"},

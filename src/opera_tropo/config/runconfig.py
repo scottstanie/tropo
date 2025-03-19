@@ -115,21 +115,21 @@ class WorkerSettings(BaseModel, extra="forbid"):
     n_workers: int = Field(
         4,
         ge=1,
-        description=("Number of workers to use in dask.Client."),
+        description="Number of workers to use in dask.Client.",
     )
     threads_per_worker: int = Field(
         2,
         ge=1,
-        description=("Number of threads to use per worker in dask.Client"),
+        description="Number of threads to use per worker in dask.Client",
     )
     max_memory: int = Field(
         default=8,
         ge=2,
-        description=("Workers are given a target memory limit in dask.Client"),
+        description="Workers are given a target memory limit in dask.Client",
     )
     dask_temp_dir: str | Path = Field(
         "tmp",
-        description=("Dask local spill directory."),
+        description="Dask local spill directory.",
     )
     block_shape: tuple[int, int] = Field(
         (128, 128),
