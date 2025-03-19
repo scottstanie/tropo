@@ -35,9 +35,8 @@ repos:
         - types-requests
         - "pydantic>=2.4"
 
-
   - repo: https://github.com/psf/black
     rev: "24.10.0"
     hooks:
       - id: black
-        args: [--preview]
+        args: [--preview, --enable-unstable-feature, string_processing]
