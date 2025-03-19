@@ -15,25 +15,28 @@ logger = logging.getLogger(__name__)
 # NOTE: I could add interpolation to specific height levels here
 #       to lower the resolution of the data, and its memory footprint during processing
 #       but I will leave that for a future performance tests
+# SCOTT NOTE: Why is `keep_bits` here a bool, not an int like in round_mantissa?
 @log_runtime
 def calculate_ztd(
-    da: xr.Dataset, out_heights: list = [], chunk_size=None, keep_bits: bool = True
+    ds: xr.Dataset, out_heights: list = [], chunk_size=None, keep_bits: bool = True
 ) -> xr.Dataset:
     """Calculate Zenith Total Delay (ZTD) using HRES weather model data."""
     hres_model = HRES()
 
     # Extract temperature and specific humidity at the first time step
-    hres_model._t = da.t.isel(time=0).values
-    hres_model._q = da.q.isel(time=0).values
+    # SCOTT NOTE: What do you need to access all of these private variables?
+    # The point of an underscore means "outside users shouldn't touch this"
+    hres_model._t = ds.t.isel(time=0).values
+    hres_model._q = ds.q.isel(time=0).values
 
     # Extract longitude and latitude values
-    longitude = da.longitude.values
-    latitude = da.latitude.values
+    longitude = ds.longitude.values
+    latitude = ds.latitude.values
 
     # Use geopotential heights and log of surface pressure
     # to get pressure, geopotential, and geopotential height
     _, pres, hgt = hres_model._calculategeoh(
-        da.z.isel(time=0, level=0).values, da.lnsp.isel(time=0, level=0).values
+        ds.z.isel(time=0, level=0).values, ds.lnsp.isel(time=0, level=0).values
     )
     hres_model._p = pres
 
@@ -42,6 +45,8 @@ def calculate_ztd(
 
     # Get altitudes
     hres_model._get_heights(hres_model._lats, hgt.transpose(1, 2, 0))
+    # SCOTT NOTE: Does this mean every single worker makes this copy just to
+    # flip the z?
     h = hres_model._zs.copy()
 
     # Re-structure arrays from (heights, lats, lons) to (lons, lats, heights)
@@ -70,7 +75,7 @@ def calculate_ztd(
         longitude,
         latitude,
         hres_model._zs,
-        da.time.data,
+        ds.time.data,
         chunk_size=chunk_size,
         keep_bits=keep_bits,
     )

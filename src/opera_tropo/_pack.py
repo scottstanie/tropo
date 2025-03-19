@@ -29,6 +29,7 @@ def pack_ztd(
     - zs (array-like): Array of heights.
     - model_time (array-like): Array of model times.
     - chunk_size (dict): Chunk size for the dataset.
+    # SCOTT NOTE: no keep bits? why a bool?
 
     Returns
     -------
@@ -46,6 +47,7 @@ def pack_ztd(
     zs = zs.astype("float32")
 
     # Rounding
+    # SCOTT NOTE: This is awkward logic and don't see why you'd set up double nested ifs
     if keep_bits:
         if TROPO_PRODUCTS.wet_delay.keep_bits:
             round_mantissa(wet_ztd, keep_bits=int(TROPO_PRODUCTS.wet_delay.keep_bits))

@@ -18,6 +18,8 @@ from .utils import round_mantissa_xr
 try:
     from RAiDER.models.model_levels import A_137_HRES, LEVELS_137_HEIGHTS
 except ImportError as e:
+    # SCOTT NOTE: IF this is an error, raise an error
+    # If we can't run without RAIDER, no need for a try/except
     print(f"RAiDER is not properly installed or accessible. Error: {e}")
 
 logger = logging.getLogger(__name__)
@@ -129,6 +131,7 @@ def tropo(
     rows = ds.sizes.get("longitude")
 
     if out_heights is not None and len(out_heights) > 0:
+        # SCOTT NOTE: What is the zlevels? how is it different than out_heights?
         zlevels = np.array(out_heights)
     else:
         zlevels = np.flipud(LEVELS_137_HEIGHTS)
@@ -160,15 +163,20 @@ def tropo(
     # with default 145 height level, specifying out_heights can
     # lower mem usage
     mem = process.memory_info().rss / 1e6
-    logger.info(f"Estimating ZTD delay, mem usage {mem:.2f} GB")
+    # SCOTT NOTE: Why do we care about the starting memory usage?
+    logger.info(f"Estimating ZTD delay, mem usage {mem:.2f} MB")
     t1 = time.time()
     out_ds = ds.map_blocks(
         calculate_ztd, kwargs={"out_heights": out_heights}, template=template
-    ).compute()
+    ).to_zarr("test.zarr")
+    # SCOTT Note: If we run .compute, not `to_zarr` or something,
+    # doesn't that need to save the entire output DataArray in memory?
     t2 = time.time()
     mem = process.memory_info().rss / 1e6
     logger.info(f"ZTD calculation took {t2 - t1:.2f} seconds.")
     logger.info(f"Mem usage {mem:.2f} GB")
+    client.close()
+    return
 
     # Clean up
     del template, ds
