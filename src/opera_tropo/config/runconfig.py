@@ -3,8 +3,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional, Dict, List
-import numpy as np
+from typing import Any, Dict, List, Optional
 
 from pydantic import (
     BaseModel,
@@ -24,22 +23,23 @@ __all__ = [
     "TropoWorkflow",
 ]
 
-PRODUCT_VERSION = '0.1'
+PRODUCT_VERSION = "0.1"
 DEFAULT_ENCODING_OPTIONS = {
-        "compression_flag": True,
-        "zlib": True,
-        "complevel": 5,
-        "shuffle": True
-        }
+    "compression_flag": True,
+    "zlib": True,
+    "complevel": 5,
+    "shuffle": True,
+}
 
 
 # Base model
 ## NOTE add option to specify s3 path
-'''
+"""
 import s3fs
 fs = s3fs.S3FileSystem(anon=True)
 aws_url = 's3://opera-dev-lts-fwd-hyunlee/20190825/D08250000082500001.zz.nc'
-'''
+"""
+
 
 class InputOptions(BaseModel, extra="forbid"):
     """Options specifying input datasets for workflow."""
@@ -49,20 +49,21 @@ class InputOptions(BaseModel, extra="forbid"):
     input_file_path: str | Path = Field(
         default_factory=str,
         description="Path to the input HRES model hres_model.nc",
-        )
+    )
 
     date_fmt: str = Field(
         "%Y%m%d",
         description="Format of dates contained in s3 HRES folder",
     )
 
-    #@root_validator(pre=True)
-    #def check_input_file_path(cls, values):
+    # @root_validator(pre=True)
+    # def check_input_file_path(cls, values):
     #    """Validator to ensure that input_file_path is specified."""
     #    input_file_path = values.get('input_file_path', None)
     #    if not input_file_path or input_file_path.strip() == "":
     #        raise ValueError("input_file_path must be specified in the configuration file.")
     #    return values
+
 
 class OutputOptions(BaseModel, extra="forbid"):
     """Options specifying input datasets for workflow."""
@@ -81,60 +82,54 @@ class OutputOptions(BaseModel, extra="forbid"):
 
     output_heights: Optional[List[float]] = Field(
         default_factory=list,
-        description=("Output height level to hydrostatic and wet delay"
-                     " default:  RAiDER HRES 145 height levels."),
+        description=(
+            "Output height level to hydrostatic and wet delay"
+            " default:  RAiDER HRES 145 height levels."
+        ),
     )
     compression_kwargs: Optional[Dict[str, Any]] = Field(
         default_factory=lambda: DEFAULT_ENCODING_OPTIONS,
-    description="Product output compression options for netcdf", 
+        description="Product output compression options for netcdf",
     )
 
-    product_version : str = Field(
-       PRODUCT_VERSION,
-       description="OPERA TROPO product version", 
+    product_version: str = Field(
+        PRODUCT_VERSION,
+        description="OPERA TROPO product version",
     )
 
     model_config = ConfigDict(extra="forbid", validate_default=True)
 
-    def get_output_filename(self, date:str, hour:str | int):
+    def get_output_filename(self, date: str, hour: str | int):
+        """Get product output filename convention
+        Product level spec: https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/data-processing-levels.
         """
-        Get product output filename convention
-        Product level spec: https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/data-processing-levels
-        """
-
-        date_time = datetime.strptime(f"{date}T{hour}", '%Y%m%dT%H')
+        date_time = datetime.strptime(f"{date}T{hour}", "%Y%m%dT%H")
         date_time = date_time.strftime(self.date_fmt)
-        proc_datetime = self.creation_time.strftime(self.date_fmt) 
+        proc_datetime = self.creation_time.strftime(self.date_fmt)
         return f"OPERA_L4_TROPO_{date_time}Z_{proc_datetime}Z_HRES_0.1_v{self.product_version}.nc"
+
 
 class WorkerSettings(BaseModel, extra="forbid"):
     """Settings for controlling CPU settings and parallelism."""
+
     n_workers: int = Field(
         4,
         ge=1,
-        description=(
-            "Number of workers to use in dask.Client."
-        ), 
+        description=("Number of workers to use in dask.Client."),
     )
     threads_per_worker: int = Field(
         2,
         ge=1,
-        description=(
-            "Number of threads to use per worker in dask.Client"
-        ),
+        description=("Number of threads to use per worker in dask.Client"),
     )
     max_memory: int = Field(
         default=8,
         ge=2,
-        description=(
-            "Workers are given a target memory limit in dask.Client"
-        ),
+        description=("Workers are given a target memory limit in dask.Client"),
     )
     dask_temp_dir: str | Path = Field(
-        'tmp',
-        description=(
-            "Dask local spill directory."
-        ),
+        "tmp",
+        description=("Dask local spill directory."),
     )
     block_shape: tuple[int, int] = Field(
         (128, 128),
@@ -177,7 +172,7 @@ class WorkflowBase(YamlModel):
     )
 
     model_config = ConfigDict(extra="allow")
-    #_tropo_version: str = PrivateAttr(_tropo_version)
+    # _tropo_version: str = PrivateAttr(_tropo_version)
     # internal helpers
     # Stores the list of directories to be created by the workflow
     _directory_list: list[Path] = PrivateAttr(default_factory=list)
@@ -196,16 +191,16 @@ class WorkflowBase(YamlModel):
             logger.debug(f"Creating directory: {d}")
             d.mkdir(parents=True, exist_ok=True)
 
+
 ##### WORKFLOW #######
 # NOTE: add functions associated with the tropo_workflow
 class TropoWorkflow(WorkflowBase, extra="forbid"):
-    """Configuration for the troposphere delay calculation"""
+    """Configuration for the troposphere delay calculation."""
 
     _tropo_directory: Path = Path("tropo")
-    #_tmp_directory: Path = Path("tmp")
+    # _tmp_directory: Path = Path("tmp")
 
     # Paths to input/output files
     input_options: InputOptions = Field(default_factory=InputOptions)
-  
-    output_options: OutputOptions = Field(default_factory=OutputOptions)
 
+    output_options: OutputOptions = Field(default_factory=OutputOptions)
