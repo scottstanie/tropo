@@ -1,7 +1,8 @@
 import click
-from opera_tropo.log.loggin_setup import setup_logging
 
+from opera_tropo.log.loggin_setup import setup_logging
 from opera_tropo.validate import compare_two_datasets
+
 
 @click.command()
 @click.argument("golden", type=click.Path(exists=True))

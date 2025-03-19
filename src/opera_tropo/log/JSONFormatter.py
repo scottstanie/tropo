@@ -40,7 +40,9 @@ class JSONFormatter(logging.Formatter):
 
     def _prepare_log_dict(self, record: logging.LogRecord) -> dict:
         always_fields = {
-            "timestamp": datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(
+                record.created, tz=timezone.utc
+            ).isoformat(),
             "message": record.getMessage(),
         }
 
