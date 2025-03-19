@@ -166,20 +166,21 @@ def tropo(
     # SCOTT NOTE: Why do we care about the starting memory usage?
     logger.info(f"Estimating ZTD delay, mem usage {mem:.2f} MB")
     t1 = time.time()
-    out_ds = ds.map_blocks(
+    ds.map_blocks(
         calculate_ztd, kwargs={"out_heights": out_heights}, template=template
     ).to_zarr("test.zarr")
+    ds.close()
+    del ds
+    del template
+    out_ds = xr.open_zarr("test.zarr")
     # SCOTT Note: If we run .compute, not `to_zarr` or something,
     # doesn't that need to save the entire output DataArray in memory?
     t2 = time.time()
     mem = process.memory_info().rss / 1e6
     logger.info(f"ZTD calculation took {t2 - t1:.2f} seconds.")
     logger.info(f"Mem usage {mem:.2f} GB")
-    client.close()
-    return
 
     # Clean up
-    del template, ds
 
     # Note, apply again rounding as interpolation can change
     # output, double check if needed
@@ -195,6 +196,7 @@ def tropo(
     encoding = {
         var: compression_options if compress else {} for var in out_ds.data_vars
     }
+    # SCOTT NOTE: this is where you'll add the bitrounding compression
     out_ds.to_netcdf(output_file, encoding=encoding, mode="w")
     t2 = time.time()
     logger.info(f"Saving {msg} took {t2 - t1:.2f} seconds.")
