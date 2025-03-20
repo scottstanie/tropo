@@ -12,26 +12,33 @@ env:
 
 jobs:
   pytest:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.12"]
       fail-fast: false
 
     steps:
-      - name: Checkout
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup environment
-      - uses: mamba-org/setup-micromamba@v2
+        uses: mamba-org/setup-micromamba@v2
         with:
           environment-name: opera_tropo
-          environment-file: environment.yml
+          environment-file: conda-env.yml
+          generate-run-shell: true
           create-args: >-
             python=${{ matrix.python-version }}
 
-
-      - name: Pytest in conda environment
-        shell: bash -l {0}
+      - name: Install dependencies
         run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate opera_tropo
           python -m pip install --no-deps .
-          pytest .
+
+      - name: Run tests with Pytest
+        run: |
+          eval "$(micromamba shell hook --shell bash)"
+          micromamba activate opera_tropo
+          pytest . --maxfail=1 --disable-warnings -v
