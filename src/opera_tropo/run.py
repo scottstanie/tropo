@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-import time
-import shutil
-import psutil
 import logging
 import shutil
 import time
@@ -14,17 +11,16 @@ import psutil
 import xarray as xr
 from dask.distributed import Client
 
-from ._pack import pack_ztd
-from .checks import validate_input
-from .core import calculate_ztd
-from .log.loggin_setup import log_runtime
-from .product_info import TROPO_PRODUCTS
-from .utils import round_mantissa_xr
+from opera_tropo._pack import pack_ztd
+from opera_tropo.checks import validate_input
+from opera_tropo.core import calculate_ztd
+from opera_tropo.product_info import TROPO_PRODUCTS
+from opera_tropo.utils import round_mantissa_xr
 
 try:
     from RAiDER.models.model_levels import A_137_HRES, LEVELS_137_HEIGHTS
 except ImportError as e:
-    print(f"RAiDER is not properly installed or accessible. Error: {e}")
+    raise ImportError(f"RAiDER is not properly installed or accessible. Error: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -160,16 +156,15 @@ def tropo(
     logger.debug(f"Chunk sizes: {chunksizes}")
 
     # Get output size
-    cols = ds.sizes.get('latitude')
-    rows = ds.sizes.get('longitude')
+    cols = ds.sizes.get("latitude")
+    rows = ds.sizes.get("longitude")
 
     if out_heights is not None and len(out_heights) > 0:
         zlevels = np.array(out_heights)
     else:
         zlevels = np.flipud(LEVELS_137_HEIGHTS)
 
-    out_size = np.empty((cols, rows, len(zlevels)),
-                         dtype=np.float32)
+    out_size = np.empty((cols, rows, len(zlevels)), dtype=np.float32)
 
     # To skip interpolation if out_heights are same as default
     if np.array_equal(out_heights, np.flipud(LEVELS_137_HEIGHTS)):
