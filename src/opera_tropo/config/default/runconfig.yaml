@@ -13,7 +13,7 @@ worker_settings:
   # Max memory to use per worker in GB.
   #   Type: integer.
   max_memory: 16GB
-  # Dask local spill directory 
+  # Dask local spill directory
   #   Type: string | null.
   dask_temp_dir: tmp
   # Size (rows [lat], columns [lon]) of blocks of data to load at a time.
@@ -35,9 +35,9 @@ output_options:
     shuffle: true
   # Chunk size of output netcdf
   #   Type: array.
-  chunk_size: 
+  chunk_size:
     - 1
-    - 8 
+    - 8
     - 512
     - 512
 

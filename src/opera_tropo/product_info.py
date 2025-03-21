@@ -148,15 +148,15 @@ class TropoProducts:
             name="wet_delay",
             long_name="Zenith Wet Delay",
             description=("One-way Zenith Wet Delay."),
-            fillvalue=9.96921e+36,
-            missing_value=9.96921e+36,
+            fillvalue=9.96921e36,
+            missing_value=9.96921e36,
             # Note sure should I keep grid_mapping here
             attrs={"units": "meters", "grid_mapping": "spatial_ref"},
             # 10 bits, has a max quantization error of
             # about 0.1 millimeters
             keep_bits=10,
             dtype=np.float32,
-        ) # type: ignore
+        )  # type: ignore
     )  # type: ignore
 
     hydrostatic_delay: ProductInfo = field(
@@ -164,15 +164,15 @@ class TropoProducts:
             name="hydrostatic_delay",
             long_name="Zenith Hydrostatic Delay",
             description=("One-way Zenith Wet Delay."),
-            fillvalue=9.96921e+36,
-            missing_value=9.96921e+36,
+            fillvalue=9.96921e36,
+            missing_value=9.96921e36,
             # Note sure should I keep grid_mapping here
             attrs={"units": "meters", "grid_mapping": "spatial_ref"},
             # 12 bits, has a max quantization error of
             # about 0.2 millimeters
             keep_bits=12,
             dtype=np.float32,
-        ) # type: ignore
+        )  # type: ignore
     )  # type: ignore
 
     coords: TropoCoordAttrs = field(default_factory=TropoCoordAttrs, init=False)
