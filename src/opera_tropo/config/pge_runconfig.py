@@ -4,9 +4,38 @@ from typing import ClassVar, Optional
 from pydantic import ConfigDict, Field
 
 from ._yaml import YamlModel
-from .runconfig import InputOptions, OutputOptions, TropoWorkflow, WorkerSettings
+from .runconfig import  (WorkerSettings, 
+                         InputOptions, 
+                         OutputOptions, 
+                         TropoWorkflow)
 
+'''
+# Note add options here to download file
+class InputFileGroup(YamlModel):
+    """Inputs for A group of input files."""
 
+    input_file_path: str = Field(
+        default_factory=str,
+        description="Path to HRES model file.",
+    )
+
+    model_date: str = Field(
+        default_factory=str,
+        description="HRES model date. eg 20190101.",
+    )
+
+    model_hour: str = Field(
+        default_factory=str,
+        description="HRES model hour. eg 06",
+    )
+
+    s3_bucket: str = Field(
+        default_factory=str,
+        description="HRES model s3 bucket.",
+    )
+
+    model_config = ConfigDict(extra="forbid")
+'''
 class PrimaryExecutable(YamlModel):
     """Group describing the primary executable."""
 
@@ -102,4 +131,5 @@ class RunConfig(YamlModel):
             # These ones directly translate
             worker_settings=worker_settings.__dict__,
             log_file=self.log_file,
-        )  # type: ignore
+            )
+    

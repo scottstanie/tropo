@@ -21,12 +21,14 @@ logger = logging.getLogger(__name__)
 import RAiDER
 from RAiDER.logger import logger as raider_log
 
-from .run import tropo 
-from .utils import get_hres_datetime, get_max_memory_usage
-from .config import runconfig, pge_runconfig
-from .log.loggin_setup import setup_logging, log_runtime
-from  .browse_image import make_browse_image_from_nc
 from opera_tropo import __version__
+
+from .browse_image import make_browse_image_from_nc
+from .config import pge_runconfig, runconfig
+from .log.loggin_setup import log_runtime, setup_logging
+from .run import tropo
+from .utils import get_hres_datetime, get_max_memory_usage
+
 
 @log_runtime
 def run(
