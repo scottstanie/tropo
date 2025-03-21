@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 from opera_tropo.config import pge_runconfig
+
 click.option = functools.partial(click.option, show_default=True)
 
 
