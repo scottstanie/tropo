@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import logging
 from pathlib import Path
 
@@ -8,7 +7,22 @@ logger = logging.getLogger(__name__)
 
 
 def compare_attrs(ds1: xr.Dataset, ds2: xr.Dataset):
-    """Compares dictionary values while excluding 'history' key."""
+    """Compare dataset attributes while ignoring the 'history' key.
+
+    Parameters
+    ----------
+    ds1 : xr.Dataset
+        First dataset to compare.
+    ds2 : xr.Dataset
+        Second dataset to compare.
+
+    Returns
+    -------
+    bool
+        True if the datasets have identical attributes
+        (excluding 'history'), False otherwise.
+
+    """
     filtered_dict1 = {k: v for k, v in ds1.attrs.items() if k != "history"}
     filtered_dict2 = {k: v for k, v in ds2.attrs.items() if k != "history"}
 
@@ -16,7 +30,21 @@ def compare_attrs(ds1: xr.Dataset, ds2: xr.Dataset):
 
 
 def compare_coord_attrs(ds1: xr.Dataset, ds2: xr.Dataset):
-    """Compares coord attribues."""
+    """Compare coordinate attributes between two datasets.
+
+    Parameters
+    ----------
+    ds1 : xr.Dataset
+        First dataset to compare.
+    ds2 : xr.Dataset
+        Second dataset to compare.
+
+    Returns
+    -------
+    bool
+        True if coordinate attributes match, False otherwise.
+
+    """
     dict1 = {coord: ds1[coord].attrs for coord in ds1.coords}
     dict2 = {coord: ds2[coord].attrs for coord in ds2.coords}
 
@@ -24,7 +52,22 @@ def compare_coord_attrs(ds1: xr.Dataset, ds2: xr.Dataset):
 
 
 def compare_two_datasets(xr_file1: str | Path, xr_file2: str | Path) -> None:
+    """Compare two xarray Dataset.
 
+    Parameters
+    ----------
+    xr_file1 : str or Path
+        Path to the first dataset file.
+    xr_file2 : str or Path
+        Path to the second dataset file.
+
+    Raises
+    ------
+    AssertionError
+        If any dataset properties (dimensions, variable names,
+        attributes, or data values) do not match.
+
+    """
     # Load two xarray Datasets
     ds1 = xr.open_dataset(xr_file1)
     ds2 = xr.open_dataset(xr_file2)

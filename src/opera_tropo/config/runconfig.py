@@ -7,12 +7,17 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import (
     BaseModel,
-    ConfigDict,
     Field,
     PrivateAttr,
 )
 
 from ._yaml import YamlModel
+
+try:
+    from RAiDER.models.model_levels import LEVELS_137_HEIGHTS
+except ImportError as e:
+    raise ImportError(f"RAiDER is not properly installed or accessible. Error: {e}")
+
 
 logger = logging.getLogger(__name__)
 
@@ -24,23 +29,10 @@ __all__ = [
 ]
 
 PRODUCT_VERSION = "0.1"
-DEFAULT_ENCODING_OPTIONS = {
-    "compression_flag": True,
-    "zlib": True,
-    "complevel": 5,
-    "shuffle": True,
-}
+DEFAULT_ENCODING_OPTIONS = {"zlib": True, "complevel": 5, "shuffle": True}
 
 
 # Base model
-## NOTE add option to specify s3 path
-"""
-import s3fs
-fs = s3fs.S3FileSystem(anon=True)
-aws_url = 's3://opera-dev-lts-fwd-hyunlee/20190825/D08250000082500001.zz.nc'
-"""
-
-
 class InputOptions(BaseModel, extra="forbid"):
     """Options specifying input datasets for workflow."""
 
@@ -55,14 +47,6 @@ class InputOptions(BaseModel, extra="forbid"):
         "%Y%m%d",
         description="Format of dates contained in s3 HRES folder",
     )
-
-    # @root_validator(pre=True)
-    # def check_input_file_path(cls, values):
-    #    """Validator to ensure that input_file_path is specified."""
-    #    input_file_path = values.get('input_file_path', None)
-    #    if not input_file_path or input_file_path.strip() == "":
-    #        raise ValueError("input_file_path must be specified in the configuration file.")
-    #    return values
 
 
 class OutputOptions(BaseModel, extra="forbid"):
@@ -80,13 +64,24 @@ class OutputOptions(BaseModel, extra="forbid"):
         description="Time the config file was created",
     )
 
+    max_height: int = Field(
+        81000,
+        description="Clip heights above specified maximum height.",
+    )
+
     output_heights: Optional[List[float]] = Field(
-        default_factory=list,
+        default=list(reversed(LEVELS_137_HEIGHTS)),
         description=(
-            "Output height level to hydrostatic and wet delay"
-            " default:  RAiDER HRES 145 height levels."
+            "Output height level to hydrostatic and wet delay,"
+            " default: HRES native 145 height levels."
         ),
     )
+
+    chunk_size: tuple[int, int, int, int] = Field(
+        (1, 8, 512, 512),
+        description="Ouput chunks (time, height, lat, lon).",
+    )
+
     compression_kwargs: Optional[Dict[str, Any]] = Field(
         default_factory=lambda: DEFAULT_ENCODING_OPTIONS,
         description="Product output compression options for netcdf",
@@ -97,16 +92,24 @@ class OutputOptions(BaseModel, extra="forbid"):
         description="OPERA TROPO product version",
     )
 
-    model_config = ConfigDict(extra="forbid", validate_default=True)
+    def get_output_filename(self, date: str | datetime, hour: str | int):
+        """Get product output filename convention."""
+        # Ensure date is a string in the expected format
+        if isinstance(date, datetime):
+            date = date.strftime("%Y%m%d")
 
-    def get_output_filename(self, date: str, hour: str | int):
-        """Get product output filename convention
-        Product level spec: https://www.earthdata.nasa.gov/learn/earth-observation-data-basics/data-processing-levels.
-        """
+        # Ensure hour is a string
+        hour = str(hour).zfill(2)
+
+        # Parse date and hour into datetime format
         date_time = datetime.strptime(f"{date}T{hour}", "%Y%m%dT%H")
-        date_time = date_time.strftime(self.date_fmt)
+
+        # Format output datetime strings
+        date_time_str = date_time.strftime(self.date_fmt)
         proc_datetime = self.creation_time.strftime(self.date_fmt)
-        return f"OPERA_L4_TROPO_{date_time}Z_{proc_datetime}Z_HRES_0.1_v{self.product_version}.nc"
+
+        datetime_str = f"{date_time_str}Z_{proc_datetime}Z"
+        return f"OPERA_L4_TROPO-ZENITH_{datetime_str}_HRES_v{self.product_version}.nc"
 
 
 class WorkerSettings(BaseModel, extra="forbid"):
@@ -122,9 +125,8 @@ class WorkerSettings(BaseModel, extra="forbid"):
         ge=1,
         description=("Number of threads to use per worker in dask.Client"),
     )
-    max_memory: int = Field(
-        default=8,
-        ge=2,
+    max_memory: int | str = Field(
+        default="16GB",
         description=("Workers are given a target memory limit in dask.Client"),
     )
     dask_temp_dir: str | Path = Field(
@@ -132,13 +134,13 @@ class WorkerSettings(BaseModel, extra="forbid"):
         description=("Dask local spill directory."),
     )
     block_shape: tuple[int, int] = Field(
-        (128, 128),
+        (128, 256),
         description="Size (rows, columns) of blocks of data to load at a time.",
     )
 
 
-class WorkflowBase(YamlModel):
-    """Base of multiple workflow configuration models."""
+class TropoWorkflow(YamlModel, extra="forbid"):
+    """Troposphere delay calculation configuration models."""
 
     # Paths to input/output files
     input_options: InputOptions = Field(default_factory=InputOptions)
@@ -171,12 +173,6 @@ class WorkflowBase(YamlModel):
         ),
     )
 
-    model_config = ConfigDict(extra="allow")
-    # _tropo_version: str = PrivateAttr(_tropo_version)
-    # internal helpers
-    # Stores the list of directories to be created by the workflow
-    _directory_list: list[Path] = PrivateAttr(default_factory=list)
-
     def model_post_init(self, context: Any, /) -> None:
         """After validation, set up properties for use during workflow run."""
         super().model_post_init(context)
@@ -184,23 +180,3 @@ class WorkflowBase(YamlModel):
         if not self.keep_paths_relative:
             # Save all directories as absolute paths
             self.work_directory = self.work_directory.resolve(strict=False)
-
-    def create_dir_tree(self) -> None:
-        """Create the directory tree for the workflow."""
-        for d in self._directory_list:
-            logger.debug(f"Creating directory: {d}")
-            d.mkdir(parents=True, exist_ok=True)
-
-
-##### WORKFLOW #######
-# NOTE: add functions associated with the tropo_workflow
-class TropoWorkflow(WorkflowBase, extra="forbid"):
-    """Configuration for the troposphere delay calculation."""
-
-    _tropo_directory: Path = Path("tropo")
-    # _tmp_directory: Path = Path("tmp")
-
-    # Paths to input/output files
-    input_options: InputOptions = Field(default_factory=InputOptions)
-
-    output_options: OutputOptions = Field(default_factory=OutputOptions)

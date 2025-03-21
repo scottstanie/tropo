@@ -9,15 +9,21 @@ import xarray as xr
 
 # This is obsolete
 def get_chunks_indices(xr_array: xr.Dataset) -> list:
-    """Get the indices for chunked slices of an xarray Dataset.
+    """Retrieve indices for chunked slices of an xarray Dataset.
+
+    This function returns a list of slice objects that define the chunked
+    sections of the dataset based on its dask chunking structure.
 
     Parameters
     ----------
-        xr_array (xr.Dataset): The input xarray Dataset.
+    xr_array : xr.Dataset
+        The input xarray Dataset.
 
     Returns
     -------
-        list: A list of slice objects representing the chunked slices.
+    list of tuple of slices
+        A list where each element is a tuple of slice objects representing
+        the chunked indices for each dimension.
 
     """
     chunks = xr_array.chunks
@@ -91,6 +97,20 @@ def get_max_memory_usage(units: str = "GB", children: bool = True) -> float:
 
 
 def get_hres_datetime(file_path: str):
+    """Extract high-resolution date and hour from an xarray Dataset.
+
+    Parameters
+    ----------
+    file_path : str
+        Path to the dataset file.
+
+    Returns
+    -------
+    tuple[str, int]
+        A tuple containing the date in 'YYYYMMDD' format
+        and the hour as an integer.
+
+    """
     with xr.open_dataset(file_path) as ds:
         hres_date = ds.time.dt.date.data[0].strftime("%Y%m%d")
         hres_hour = ds.time.dt.hour.data[0]
@@ -156,6 +176,24 @@ def round_mantissa(z: np.ndarray, keep_bits=10):
 
 
 def round_mantissa_xr(data, keep_bits=10):
+    """Round the mantissa of a floating-point xarray DataArray.
+
+    This function modifies only floating-point arrays, ensuring that integer
+    arrays (e.g., spatial reference data) remain unchanged.
+
+    Parameters
+    ----------
+    data : xr.DataArray
+        The input xarray DataArray.
+    keep_bits : int, optional
+        The number of bits to keep in the mantissa (default is 10).
+
+    Returns
+    -------
+    xr.DataArray
+        The processed DataArray with rounded mantissa for floating-point values.
+
+    """
     # Ensure processing only happens for floating-point arrays
     #  Skip int, e.g. spatial_ref in data_var gives error
     if np.issubdtype(data.dtype, np.floating):

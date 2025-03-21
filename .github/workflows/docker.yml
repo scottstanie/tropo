@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   docker-build:
-    name: Build, Test & Publish Docker Image
+    name: Build & Publish Docker Image
     runs-on: ubuntu-latest
 
     steps:

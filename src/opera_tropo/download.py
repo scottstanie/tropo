@@ -68,9 +68,12 @@ def _get_s3_key(date_input: str, hour: str, version: str = "1", date_format="%Y%
     """Generate an S3 key for a specific date and hour.
 
     Args:
-        date_input (str): The date in the format specified by date_format (default is '%Y%m%d').
-        hour (str): The hour, which must be one of the allowed values ('00', '06', '12', '18').
-        date_format (str): The format of the input date string. Defaults to '%Y%m%d'.
+        date_input (str): The date in the format specified
+                          by date_format (default is '%Y%m%d').
+        hour (str): The hour, which must be one of the allowed values
+                    ('00', '06', '12', '18').
+        date_format (str): The format of the input date string.
+                            Defaults to '%Y%m%d'.
         version (str): The version of the file. Defaults to '01'.
 
     Returns:
@@ -91,6 +94,24 @@ def _get_s3_key(date_input: str, hour: str, version: str = "1", date_format="%Y%
 
 
 def download_hres(config: HRESConfig) -> None:
+    """Download HRES data from an S3 bucket.
+
+    This function constructs the S3 key for the requested HRES data based on
+    the provided configuration, then downloads the file to the specified
+    output path.
+
+    Parameters
+    ----------
+    config : HRESConfig
+        Configuration object containing the date, hour, version, S3 bucket
+        name, output path, and AWS region.
+
+    Raises
+    ------
+    RuntimeError
+        If the download from S3 fails.
+
+    """
     # Get the s3 key
     s3_key, filename = _get_s3_key(config.date, config.hour, f"{config.version}")
     logger.info(f"Downloading HRES {s3_key} from {config.s3_bucket}")

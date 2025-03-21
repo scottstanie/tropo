@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import click
 
 __all__ = ["run_cli", "run_main"]
