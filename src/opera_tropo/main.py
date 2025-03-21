@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import logging
 import os
 from pathlib import Path
@@ -17,17 +16,6 @@ from opera_tropo.utils import get_hres_datetime, get_max_memory_usage
 
 # Logger setup
 logger = logging.getLogger(__name__)
-
-import RAiDER
-from RAiDER.logger import logger as raider_log
-
-from opera_tropo import __version__
-
-from .browse_image import make_browse_image_from_nc
-from .config import pge_runconfig, runconfig
-from .log.loggin_setup import log_runtime, setup_logging
-from .run import tropo
-from .utils import get_hres_datetime, get_max_memory_usage
 
 
 @log_runtime
@@ -49,7 +37,9 @@ def run(
         Default is False.
 
     """
-    setup_logging(logger_name="opera_tropo", debug=debug, filename=cfg.log_file)  # type: ignore
+    setup_logging(
+        logger_name="opera_tropo", debug=debug, filename=str(cfg.log_file)
+    )  # type: ignore
 
     # Save the start for a metadata field
     # processing_start_datetime = datetime.now(timezone.utc)
@@ -57,7 +47,7 @@ def run(
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
 
     # Change to work directory
-    logger.debug(f'Work directory: {cfg.work_directory}')
+    logger.debug(f"Work directory: {cfg.work_directory}")
     os.chdir(cfg.work_directory)
 
     # Change to work directory
@@ -65,7 +55,7 @@ def run(
     os.chdir(cfg.work_directory)
 
     # Change to work directory
-    logger.debug(f'Work directory: {cfg.work_directory}')
+    logger.debug(f"Work directory: {cfg.work_directory}")
     os.chdir(cfg.work_directory)
 
     # Get output filename

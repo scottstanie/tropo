@@ -5,7 +5,9 @@ import os
 import sys
 import time
 from collections.abc import Callable
-from typing import (TypeVar, ParamSpec)
+from functools import wraps
+from pathlib import Path
+from typing import Optional, ParamSpec, TypeVar
 
 if sys.version_info >= (3, 10):
     from typing import ParamSpec
@@ -17,7 +19,31 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 
-def setup_logging(*, logger_name: str = "opera_tropo", debug: bool = False, filename: str = None):
+def setup_logging(
+    *,
+    logger_name: str = "opera_tropo",
+    debug: bool = False,
+    filename: Optional[str] = None,
+):
+    """Set up logging configuration for the specified logger.
+
+    Parameters
+    ----------
+    logger_name : str, optional
+        The name of the logger to configure. Default is "opera_tropo".
+    debug : bool, optional
+        Whether to set the logger and handlers to DEBUG level.
+        If True, logging will include debug messages. Default is False.
+    filename : Optional[str], optional
+        The file path where logs should be written.
+        If provided, logs will be saved to this file.
+
+    The function reads logging configuration from 'log-config.json'
+    located in the same directory as this script.
+    It updates the configuration based on the provided parameters
+    and applies it.
+
+    """
     config_file = Path(__file__).parent / "log-config.json"
 
     with open(config_file) as f_in:
@@ -68,7 +94,7 @@ def log_runtime(f: Callable[P, T]) -> Callable[P, T]:
         time_string = (
             f"Total elapsed time for {f.__module__}.{f.__name__}: "
             f"{elapsed_minutes:.2f} minutes ({elapsed_seconds:.2f} seconds)"
-        )   
+        )
 
         logger.debug(time_string)
 
