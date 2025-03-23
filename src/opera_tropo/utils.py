@@ -119,7 +119,7 @@ def get_hres_datetime(file_path: str):
 
 # Round_mantissa function from
 # https://github.com/isce-framework/dolphin/blob/ee4271fa6e085168587cb96f977b1617a75304e1/src/dolphin/io/_utils.py#L244
-def round_mantissa(z: np.ndarray, keep_bits=10):
+def round_mantissa(z: np.ndarray, keep_bits: int = 10):
     """Zero out mantissa bits of elements of array in place.
 
     Drops a specified number of bits from the floating point mantissa,
@@ -175,7 +175,7 @@ def round_mantissa(z: np.ndarray, keep_bits=10):
     b &= mask
 
 
-def round_mantissa_xr(data, keep_bits=10):
+def _round_mantissa_xr(data, keep_bits=10):
     """Round the mantissa of a floating-point xarray DataArray.
 
     This function modifies only floating-point arrays, ensuring that integer
@@ -199,3 +199,22 @@ def round_mantissa_xr(data, keep_bits=10):
     if np.issubdtype(data.dtype, np.floating):
         round_mantissa(data, keep_bits)
     return data
+
+
+def rounding_mantissa_blocks(ds: xr.DataArray, keep_bits: int):
+    """Round the mantissa blocks of a given xr.DataArray.
+
+    Parameters
+    ----------
+    ds : xr.DataArray
+        The input xr.DataArray to process.
+    keep_bits : int
+        The number of bits to keep in the mantissa blocks.
+
+    Returns
+    -------
+    xr.DataArray
+        The processed xr.DataArray with rounded mantissa blocks.
+
+    """
+    return ds.map(_round_mantissa_xr, keep_bits=keep_bits)
