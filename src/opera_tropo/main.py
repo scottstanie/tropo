@@ -37,22 +37,13 @@ def run(
         Default is False.
 
     """
+    # NOTE: figure how to redirct dask and RAiDER streams to logfile
     setup_logging(
         logger_name="opera_tropo", debug=debug, filename=str(cfg.log_file)
     )  # type: ignore
 
     # Save the start for a metadata field
-    # processing_start_datetime = datetime.now(timezone.utc)
-    cfg.work_directory.mkdir(exist_ok=True, parents=True)
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
-
-    # Change to work directory
-    logger.debug(f"Work directory: {cfg.work_directory}")
-    os.chdir(cfg.work_directory)
-
-    # Change to work directory
-    logger.debug(f"Work directory: {cfg.work_directory}")
-    os.chdir(cfg.work_directory)
 
     # Change to work directory
     logger.debug(f"Work directory: {cfg.work_directory}")
@@ -78,21 +69,18 @@ def run(
     )
 
     # Remove RAIDER empty log files
+    # NOTE: not succeded in supressing it with logging
     for handler in raider_log.handlers:
         if isinstance(handler, logging.FileHandler):
-            Path(handler.baseFilename).unlink(missing_ok=True)
-
-    # Remove RAIDER empty log files
-    for handler in raider_log.handlers:
-        if isinstance(handler, logging.FileHandler):
+            logger.debug(f" Removing RAIDER logs: {handler.baseFilename}")
             Path(handler.baseFilename).unlink(missing_ok=True)
 
     # Generate output browse image
-    logger.info(f"Output file: {Path(cfg.output_directory) / output_filename}")
+    logger.info(f" Output file: {Path(cfg.output_directory) / output_filename}")
     output_png = Path(cfg.output_directory) / output_filename
     output_png = output_png.with_suffix(".png")
-    logger.info(f"Output browse image: {output_png}")
     make_browse_image_from_nc(output_png, Path(cfg.output_directory) / output_filename)
+    logger.info(f" Output browse image: {output_png}")
 
     logger.info(f"Product type: {pge_runconfig.primary_executable.product_type}")
     logger.info(f"Product version: {pge_runconfig.product_path_group.product_version}")
