@@ -67,9 +67,9 @@ class JSONFormatter(logging.Formatter):
     def _prepare_log_dict(self, record: logging.LogRecord) -> dict:
         """Prepare logger dict."""
         always_fields = {
-            "timestamp": datetime.fromtimestamp(
-                record.created, tz=timezone.utc
-            ).isoformat(),
+            "timestamp": (
+                datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat()
+            ),
             "message": record.getMessage(),
         }
 
@@ -80,7 +80,7 @@ class JSONFormatter(logging.Formatter):
             always_fields["stack_info"] = self.formatStack(record.stack_info)
 
         message = {
-            key: (always_fields.pop(val, None) or getattr(record, val, None))
+            key: always_fields.pop(val, None) or getattr(record, val, None)
             for key, val in self.fmt_keys.items()
         }
         message.update(always_fields)
