@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
 
 from RAiDER import __version__ as raider_version
@@ -45,9 +44,8 @@ def run(
     # Save the start for a metadata field
     cfg.output_directory.mkdir(exist_ok=True, parents=True)
 
-    # Change to work directory
+    # Report work directory
     logger.debug(f"Work directory: {cfg.work_directory}")
-    os.chdir(cfg.work_directory)
 
     # Get output filename
     hres_date, hres_hour = get_hres_datetime(cfg.input_options.input_file_path)  # type: ignore

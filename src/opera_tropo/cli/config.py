@@ -15,8 +15,8 @@ def create_config(
     max_height: int = 81000,
     n_workers: int = 4,
     n_threads: int = 2,
-    worker_memory: int | str = "16GB",
-    block_shape: tuple[int, int] = (128, 256),
+    worker_memory: int | str = "8GB",
+    block_shape: tuple[int, int] = (128, 128),
     log_file: str = "tropo_run.log",
 ) -> None:
     """Generate and save a run configuration file for tropospheric processing."""
@@ -67,13 +67,13 @@ def create_config(
 @click.option(
     "--worker-settings",
     type=(int, int, int),
-    default=(4, 2, 16),
+    default=(4, 2, 8),
     help="Worker settings: (n_workers, n_threads, worker_memory[GB]).",
 )
 @click.option(
     "--chunks",
     type=(int, int),
-    default=(128, 256),
+    default=(128, 128),
     help="Block shape for worker processing.",
 )
 @click.option("--log", type=str, default="run_tropo.log", help="Log filename")

@@ -28,7 +28,7 @@ __all__ = [
     "TropoWorkflow",
 ]
 
-PRODUCT_VERSION = "0.1"
+PRODUCT_VERSION = "0.2"
 DEFAULT_ENCODING_OPTIONS = {"zlib": True, "complevel": 5, "shuffle": True}
 
 
@@ -131,7 +131,7 @@ class WorkerSettings(BaseModel, extra="forbid"):
     )
     dask_temp_dir: str | Path = Field(
         "tmp",
-        description=("Dask local spill directory."),
+        description=("Dask local spill directory within work directory."),
     )
     block_shape: tuple[int, int] = Field(
         (128, 128),

@@ -37,7 +37,7 @@ class ProductPathGroup(YamlModel):
         alias="sas_output_path",
     )
     product_version: str = Field(
-        default="0.1",
+        default="0.2",
         description="Version of the product, in <major>.<minor> format.",
     )
     model_config = ConfigDict(extra="forbid")
