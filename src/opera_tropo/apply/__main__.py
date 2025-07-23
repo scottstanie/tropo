@@ -15,6 +15,7 @@ from opera_utils.disp import DispProductStack, search
 from shapely.geometry import box
 
 from ._helpers import (
+    MissingTropoError,
     _bracket,
     _build_tropo_index,
     _height_to_utm_surface,
@@ -29,6 +30,7 @@ def main(
     frame_id: int | None = None,
     disp_files: list[Path] | None = None,
     tropo_urls_file: Path = Path("tropo_urls.txt"),
+    dem_path: Path | str | None = None,
     out_dir: Path = Path("corrections"),
     margin_deg: float = 0.3,
 ):
@@ -44,14 +46,14 @@ def main(
         stack = DispProductStack.from_file_list(disp_files)
 
     frame_id = stack.frame_id
-    df = stack.to_dataframe()
+    stack.to_dataframe()
     # ref_dt = pd.to_datetime(df.reference_datetime.iloc[0], utc=True)
     # sec_dts = pd.to_datetime(df.secondary_datetime, utc=True)
 
     ref_dt_series = pd.to_datetime(stack.reference_dates, utc=True).to_series()
     sec_dt_series = pd.to_datetime(stack.secondary_dates, utc=True).to_series()
 
-    dem_url = get_dem_url(df.frame_id.iloc[0])
+    dem_url = get_dem_url(stack.frame_id) if dem_path is None else dem_path
     logger.info(f"Opening DEM at {dem_url}")
     dem_utm = _open_2d(dem_url)
     bbox = box(*dem_utm.rio.transform_bounds("epsg:4326")).buffer(margin_deg).bounds
@@ -70,7 +72,12 @@ def main(
     for ref_ts, sec_ts in zip(ref_dt_series, sec_dt_series):
         logger.info(f"Running DISP {ref_ts} -> {sec_ts}")
         if ref_ts not in delay_per_date:
-            early_u_ref, late_u_ref = _bracket(tropo_idx, ref_ts)
+            try:
+                early_u_ref, late_u_ref = _bracket(tropo_idx, ref_ts)
+            except MissingTropoError:
+                logger.info(f"No available tropo files for {early_u_ref, late_u_ref}")
+                continue
+
             logger.info(f"Found {early_u_ref, late_u_ref}")
             ds0 = _open_crop(early_u_ref, lat_bounds, lon_bounds, h_max)
             ds1 = _open_crop(late_u_ref, lat_bounds, lon_bounds, h_max)
@@ -84,7 +91,11 @@ def main(
         else:
             surf_ref = delay_per_date[ref_ts]
 
-        early_u_sec, late_u_sec = _bracket(tropo_idx, sec_ts)
+        try:
+            early_u_sec, late_u_sec = _bracket(tropo_idx, sec_ts)
+        except MissingTropoError:
+            logger.info(f"No available tropo files for {early_u_sec, late_u_sec}")
+            continue
         logger.info(f"Interp. for  {early_u_sec, late_u_sec}")
         ds0s = _open_crop(early_u_sec, lat_bounds, lon_bounds, h_max)
         ds1s = _open_crop(late_u_sec, lat_bounds, lon_bounds, h_max)
@@ -98,7 +109,8 @@ def main(
         # for _, row in df.iterrows():
         # sec_ts = pd.to_datetime(sec_ts, utc=True)
         # corr = delay_2d[sec_ts] - delay_2d[ref_ts]
-        out_name = f"tropo_corr_F{frame_id:05d}_{ref_ts:%Y%m%dT%H%M%S}Z_{sec_ts:%Y%m%dT%H%M%S}Z.tif"
+        time_pair_str = f"{ref_ts:%Y%m%dT%H%M%S}Z_{sec_ts:%Y%m%dT%H%M%S}Z"
+        out_name = f"tropo_corr_F{frame_id:05d}_{time_pair_str}.tif"
         corr.rio.to_raster(out_dir / out_name)
         logger.info(f"Wrote {out_name}")
 

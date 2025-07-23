@@ -33,7 +33,7 @@ def get_los_url(frame_id: int) -> str:
     return f"s3://opera-adt/disp/disp-s1-static-layers/F{frame_id:05d}/los_enu.tif"
 
 
-def _open_2d(filename: str) -> xr.DataArray:
+def _open_2d(filename: str | Path) -> xr.DataArray:
     raster = rxr.open_rasterio(filename)
     if isinstance(raster, list):
         return raster[0].squeeze(drop=True)
