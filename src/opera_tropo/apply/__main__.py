@@ -75,7 +75,7 @@ def main(
             try:
                 early_u_ref, late_u_ref = _bracket(tropo_idx, ref_ts)
             except MissingTropoError:
-                logger.info(f"No available tropo files for {early_u_ref, late_u_ref}")
+                logger.info(f"No available tropo files for {ref_ts}")
                 continue
 
             logger.info(f"Found {early_u_ref, late_u_ref}")
@@ -94,7 +94,7 @@ def main(
         try:
             early_u_sec, late_u_sec = _bracket(tropo_idx, sec_ts)
         except MissingTropoError:
-            logger.info(f"No available tropo files for {early_u_sec, late_u_sec}")
+            logger.info(f"No available tropo files for {sec_ts}")
             continue
         logger.info(f"Interp. for  {early_u_sec, late_u_sec}")
         ds0s = _open_crop(early_u_sec, lat_bounds, lon_bounds, h_max)
