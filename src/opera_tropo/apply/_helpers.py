@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import rioxarray as rxr
 import xarray as xr
+from loguru import logger
 from opera_utils import get_dates
 from opera_utils.disp import open_file
 from scipy.interpolate import RegularGridInterpolator
@@ -36,22 +37,22 @@ def _open_2d(filename: str) -> xr.DataArray:
         return raster.squeeze(drop=True)
 
 
-def _build_tropo_index(urls: list[str]) -> pd.Series:
+def _build_tropo_index(urls: list[str]) -> pd.DatetimeIndex:
     """Return Series(url, index=datetime UTC)."""
     times = [get_dates(u, fmt="%Y%m%dT%H%M%S")[0] for u in urls]
-    return pd.Series(urls, index=pd.to_datetime(times, utc=True))
+    return pd.to_datetime(times, utc=True)
 
 
-def _bracket(url_index: pd.Series, ts: pd.Timestamp) -> tuple[str, str]:
+def _bracket(url_index: pd.DatetimeIndex, ts: pd.Timestamp) -> tuple[str, str]:
     """Return (earlier, later) urls within ±6 h; raises if missing."""
-    early = url_index.loc[:ts].iloc[-1]  # backward
-    late = url_index.loc[ts:].iloc[0]  # forward
+    url_series = url_index.to_series()
+    early = pd.Timestamp(url_series.loc[:ts].iloc[-1])  # backward
+    late = pd.Timestamp(url_series.loc[ts:].iloc[0])  # forward
     if (ts - early.name) > TROPO_INTERVAL or (late.name - ts) > TROPO_INTERVAL:
         raise ValueError(f"No tropo product within ±6 h of {ts}")
     return early, late
 
 
-# ---------- I/O + cropping --------------------------------------------------
 @lru_cache(maxsize=16)
 def _open_crop(
     url: str,
@@ -61,6 +62,7 @@ def _open_crop(
     h_margin: float = 500,
 ) -> xr.Dataset:
     """Lazy-open a single L4 file and subset to bbox+height."""
+    logger.info(f"Cropping {url}")
     if Path(url).exists():
         ds = xr.open_dataset(url, engine="h5netcdf")
     else:
@@ -89,21 +91,29 @@ def _interp_in_time(
     return (1.0 - w) * td0 + w * td1  # keeps (height, lat, lon)
 
 
-def _height_to_utm_surface(td_3d: xr.DataArray, dem_utm: xr.DataArray) -> xr.DataArray:
+def _height_to_utm_surface(
+    td_3d: xr.DataArray,
+    dem_utm: xr.DataArray,
+    method: str = "linear",
+) -> xr.DataArray:
     """Use RegularGridInterpolator exactly like your apply-tropo logic."""
     td_3d = td_3d.rename(latitude="y", longitude="x")  # rioxarray expects y/x
-    td_utm = td_3d.rio.write_crs("epsg:4326").rio.reproject(
-        dem_utm.rio.crs, resampling="cubic"
-    )
-    td_utm = td_utm.isel(x=slice(2, -2), y=slice(2, -2))  # trim edges
+    if dem_utm.rio.crs != "epsg:4326":
+        td_utm = td_3d.rio.write_crs("epsg:4326").rio.reproject(
+            dem_utm.rio.crs, resampling="cubic"
+        )
+        td_utm = td_utm.isel(x=slice(2, -2), y=slice(2, -2))  # trim edges
+    else:
+        td_utm = td_3d
 
     rgi = RegularGridInterpolator(
         (td_utm.height.values, td_utm.y.values, td_utm.x.values),
         td_utm.values,
-        method="cubic",
+        method=method,
         bounds_error=False,
         fill_value=np.nan,
     )
+    # TODO: Interpolate this in patches? otherwise, its 7k x 9k...
     yy, xx = np.meshgrid(dem_utm.y, dem_utm.x, indexing="ij")
     interp = rgi((dem_utm.values.ravel(), yy.ravel(), xx.ravel()))
     out = dem_utm.copy()

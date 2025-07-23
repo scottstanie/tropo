@@ -41,15 +41,19 @@ def main(
         products = search(frame_id=frame_id)
         stack = DispProductStack(products=products)
     else:
-        stack = DispProductStack.from_file_list(
-            [p.read_text().strip() for p in disp_files]
-        )
+        stack = DispProductStack.from_file_list(disp_files)
 
+    frame_id = stack.frame_id
     df = stack.to_dataframe()
-    ref_dt = pd.to_datetime(df.reference_datetime.iloc[0], utc=True)
-    sec_dts = pd.to_datetime(df.secondary_datetime, utc=True)
+    # ref_dt = pd.to_datetime(df.reference_datetime.iloc[0], utc=True)
+    # sec_dts = pd.to_datetime(df.secondary_datetime, utc=True)
 
-    dem_utm = _open_2d(get_dem_url(df.frame_id.iloc[0]))
+    ref_dt_series = pd.to_datetime(stack.reference_dates, utc=True).to_series()
+    sec_dt_series = pd.to_datetime(stack.secondary_dates, utc=True).to_series()
+
+    dem_url = get_dem_url(df.frame_id.iloc[0])
+    logger.info(f"Opening DEM at {dem_url}")
+    dem_utm = _open_2d(dem_url)
     bbox = box(*dem_utm.rio.transform_bounds("epsg:4326")).buffer(margin_deg).bounds
     lat_bounds = (bbox[3], bbox[1])  # north, south
     lon_bounds = (bbox[0], bbox[2])  # west , east
@@ -59,21 +63,42 @@ def main(
     tropo_idx = _build_tropo_index(tropo_urls)
 
     # cache delays for every unique timestamp
-    delay_2d = {}
-    for ts in {ref_dt, *sec_dts}:
-        early_u, late_u = _bracket(tropo_idx, ts)
-        ds0 = _open_crop(early_u, lat_bounds, lon_bounds, h_max)
-        ds1 = _open_crop(late_u, lat_bounds, lon_bounds, h_max)
-
-        td_interp = _interp_in_time(ds0, ds1, ds0.time.item(), ds1.time.item(), ts)
-        delay_2d[ts] = _height_to_utm_surface(td_interp.total_delay, dem_utm)
-
-    # ---------- write corrections ------------------------------------------
+    # TODO: figure out appropriate cacheing...
+    delay_per_date = {}
+    # for ts in {ref_dt, *sec_dts}:
     out_dir.mkdir(exist_ok=True, parents=True)
-    for _, row in df.iterrows():
-        sec_ts = pd.to_datetime(row.secondary_datetime, utc=True)
-        corr = delay_2d[sec_ts] - delay_2d[ref_dt]
-        out_name = f"tropo_corr_F{row.frame_id:05d}_{sec_ts:%Y%m%dT%H%M%S}Z.tif"
+    for ref_ts, sec_ts in zip(ref_dt_series, sec_dt_series):
+        logger.info(f"Running DISP {ref_ts} -> {sec_ts}")
+        if ref_ts not in delay_per_date:
+            early_u_ref, late_u_ref = _bracket(tropo_idx, ref_ts)
+            logger.info(f"Found {early_u_ref, late_u_ref}")
+            ds0 = _open_crop(early_u_ref, lat_bounds, lon_bounds, h_max)
+            ds1 = _open_crop(late_u_ref, lat_bounds, lon_bounds, h_max)
+
+            # delay_2d[ts] = _height_to_utm_surface(td_interp.total_delay, dem_utm)
+            td_interp_ref = _interp_in_time(
+                ds0, ds1, ds0.time.item(), ds1.time.item(), ref_ts
+            )
+            surf_ref = _height_to_utm_surface(td_interp_ref.total_delay, dem_utm)
+            delay_per_date[ref_ts] = surf_ref
+        else:
+            surf_ref = delay_per_date[ref_ts]
+
+        early_u_sec, late_u_sec = _bracket(tropo_idx, sec_ts)
+        logger.info(f"Interp. for  {early_u_sec, late_u_sec}")
+        ds0s = _open_crop(early_u_sec, lat_bounds, lon_bounds, h_max)
+        ds1s = _open_crop(late_u_sec, lat_bounds, lon_bounds, h_max)
+        td_interp_sec = _interp_in_time(
+            ds0s, ds1s, ds0s.time.item(), ds1s.time.item(), sec_ts
+        )
+        surf_sec = _height_to_utm_surface(td_interp_sec.total_delay, dem_utm)
+        corr = surf_sec - surf_ref
+
+        # # ---------- write corrections ------------------------------------------
+        # for _, row in df.iterrows():
+        # sec_ts = pd.to_datetime(sec_ts, utc=True)
+        # corr = delay_2d[sec_ts] - delay_2d[ref_ts]
+        out_name = f"tropo_corr_F{frame_id:05d}_{ref_ts:%Y%m%dT%H%M%S}Z_{sec_ts:%Y%m%dT%H%M%S}Z.tif"
         corr.rio.to_raster(out_dir / out_name)
         logger.info(f"Wrote {out_name}")
 
