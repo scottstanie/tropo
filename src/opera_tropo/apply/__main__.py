@@ -62,7 +62,7 @@ def main(
     h_max = float(dem_utm.max())
 
     tropo_urls = Path(tropo_urls_file).read_text().splitlines()
-    tropo_idx = _build_tropo_index(tropo_urls)
+    tropo_idx_series = _build_tropo_index(tropo_urls)
 
     # cache delays for every unique timestamp
     # TODO: figure out appropriate cacheing...
@@ -73,7 +73,7 @@ def main(
         logger.info(f"Running DISP {ref_ts} -> {sec_ts}")
         if ref_ts not in delay_per_date:
             try:
-                early_u_ref, late_u_ref = _bracket(tropo_idx, ref_ts)
+                early_u_ref, late_u_ref = _bracket(tropo_idx_series, ref_ts)
             except MissingTropoError:
                 logger.info(f"No available tropo files for {ref_ts}")
                 continue
@@ -92,7 +92,7 @@ def main(
             surf_ref = delay_per_date[ref_ts]
 
         try:
-            early_u_sec, late_u_sec = _bracket(tropo_idx, sec_ts)
+            early_u_sec, late_u_sec = _bracket(tropo_idx_series, sec_ts)
         except MissingTropoError:
             logger.info(f"No available tropo files for {sec_ts}")
             continue

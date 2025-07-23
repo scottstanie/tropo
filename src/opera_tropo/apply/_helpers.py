@@ -41,20 +41,25 @@ def _open_2d(filename: str | Path) -> xr.DataArray:
         return raster.squeeze(drop=True)
 
 
-def _build_tropo_index(urls: list[str]) -> pd.DatetimeIndex:
+def _build_tropo_index(urls: list[str]) -> pd.Series:
     """Return Series(url, index=datetime UTC)."""
     times = [get_dates(u, fmt="%Y%m%dT%H%M%S")[0] for u in urls]
-    return pd.to_datetime(times, utc=True)
+    return pd.Series(urls, index=pd.to_datetime(times, utc=True))
 
 
-def _bracket(url_index: pd.DatetimeIndex, ts: pd.Timestamp) -> tuple[str, str]:
+def _bracket(url_series: pd.Series, ts: pd.Timestamp) -> tuple[str, str]:
     """Return (earlier, later) urls within ±6 h; raises if missing."""
-    url_series = url_index.to_series()
-    early = pd.Timestamp(url_series.loc[:ts].iloc[-1])  # backward
-    late = pd.Timestamp(url_series.loc[ts:].iloc[0])  # forward
-    if (ts - early) > TROPO_INTERVAL or (late - ts) > TROPO_INTERVAL:
+    # Last url/date before `ts`
+    early = url_series.loc[:ts]
+    early_date = early.index[-1]
+    early_url = early.iloc[-1]
+    # First url/date after `ts`
+    late = url_series.loc[ts:]
+    late_date = late.index[0]
+    late_url = late.iloc[0]
+    if (ts - early_date) > TROPO_INTERVAL or (late_date - ts) > TROPO_INTERVAL:
         raise MissingTropoError(f"No tropo product within ±6 h of {ts}")
-    return early, late
+    return early_url, late_url
 
 
 @lru_cache(maxsize=16)
