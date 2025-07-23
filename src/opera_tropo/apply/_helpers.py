@@ -17,6 +17,10 @@ from scipy.interpolate import RegularGridInterpolator
 TROPO_INTERVAL = timedelta(hours=6)
 
 
+class MissingTropoError(ValueError):
+    """No tropospheric file is available matching the requested time."""
+
+
 def get_dem_url(frame_id: int) -> str:
     """Generate the URL for DEM data for a given frame ID."""
     return (
@@ -48,8 +52,8 @@ def _bracket(url_index: pd.DatetimeIndex, ts: pd.Timestamp) -> tuple[str, str]:
     url_series = url_index.to_series()
     early = pd.Timestamp(url_series.loc[:ts].iloc[-1])  # backward
     late = pd.Timestamp(url_series.loc[ts:].iloc[0])  # forward
-    if (ts - early.name) > TROPO_INTERVAL or (late.name - ts) > TROPO_INTERVAL:
-        raise ValueError(f"No tropo product within ±6 h of {ts}")
+    if (ts - early) > TROPO_INTERVAL or (late - ts) > TROPO_INTERVAL:
+        raise MissingTropoError(f"No tropo product within ±6 h of {ts}")
     return early, late
 
 
