@@ -50,8 +50,8 @@ def main(
     # ref_dt = pd.to_datetime(df.reference_datetime.iloc[0], utc=True)
     # sec_dts = pd.to_datetime(df.secondary_datetime, utc=True)
 
-    ref_dt_series = pd.to_datetime(stack.reference_dates, utc=True).to_series()
-    sec_dt_series = pd.to_datetime(stack.secondary_dates, utc=True).to_series()
+    ref_dt_series = pd.to_datetime(stack.reference_dates).tz_localize(None).to_series()
+    sec_dt_series = pd.to_datetime(stack.secondary_dates).tz_localize(None).to_series()
 
     dem_url = get_dem_url(stack.frame_id) if dem_path is None else dem_path
     logger.info(f"Opening DEM at {dem_url}")
@@ -84,7 +84,11 @@ def main(
 
             # delay_2d[ts] = _height_to_utm_surface(td_interp.total_delay, dem_utm)
             td_interp_ref = _interp_in_time(
-                ds0, ds1, ds0.time.item(), ds1.time.item(), ref_ts
+                ds0,
+                ds1,
+                ds0.time.to_pandas().item(),
+                ds1.time.to_pandas().item(),
+                ref_ts,
             )
             surf_ref = _height_to_utm_surface(td_interp_ref.total_delay, dem_utm)
             delay_per_date[ref_ts] = surf_ref
@@ -100,7 +104,11 @@ def main(
         ds0s = _open_crop(early_u_sec, lat_bounds, lon_bounds, h_max)
         ds1s = _open_crop(late_u_sec, lat_bounds, lon_bounds, h_max)
         td_interp_sec = _interp_in_time(
-            ds0s, ds1s, ds0s.time.item(), ds1s.time.item(), sec_ts
+            ds0s,
+            ds1s,
+            ds0s.time.to_pandas().item(),
+            ds1s.time.to_pandas().item(),
+            sec_ts,
         )
         surf_sec = _height_to_utm_surface(td_interp_sec.total_delay, dem_utm)
         corr = surf_sec - surf_ref

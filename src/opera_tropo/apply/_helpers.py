@@ -10,7 +10,7 @@ import rioxarray as rxr
 import xarray as xr
 from loguru import logger
 from opera_utils import get_dates
-from opera_utils.disp import open_file
+from rasterio.enums import Resampling
 from scipy.interpolate import RegularGridInterpolator
 
 # ---------- time utilities --------------------------------------------------
@@ -44,7 +44,7 @@ def _open_2d(filename: str | Path) -> xr.DataArray:
 def _build_tropo_index(urls: list[str]) -> pd.Series:
     """Return Series(url, index=datetime UTC)."""
     times = [get_dates(u, fmt="%Y%m%dT%H%M%S")[0] for u in urls]
-    return pd.Series(urls, index=pd.to_datetime(times, utc=True))
+    return pd.Series(urls, index=pd.to_datetime(times, utc=True).tz_localize(None))
 
 
 def _bracket(url_series: pd.Series, ts: pd.Timestamp) -> tuple[str, str]:
@@ -72,10 +72,11 @@ def _open_crop(
 ) -> xr.Dataset:
     """Lazy-open a single L4 file and subset to bbox+height."""
     logger.info(f"Cropping {url}")
-    if Path(url).exists():
-        ds = xr.open_dataset(url, engine="h5netcdf")
-    else:
-        ds = open_file(url)
+    ds = xr.open_dataset(url, engine="h5netcdf")
+    # if Path(url).exists():
+    #     ds = xr.open_dataset(url, engine="h5netcdf")
+    # else:
+    #     ds = open_file(url)
     lat_max, lat_min = lat_bounds  # note south-to-north ordering in slice
     lon_min, lon_max = lon_bounds
     ds = ds.sel(
@@ -97,7 +98,12 @@ def _interp_in_time(
     w = (t - t0) / (t1 - t0)
     td0 = ds0.hydrostatic_delay + ds0.wet_delay
     td1 = ds1.hydrostatic_delay + ds1.wet_delay
-    return (1.0 - w) * td0 + w * td1  # keeps (height, lat, lon)
+    # keeps (height, lat, lon)
+    td0 = (ds0.hydrostatic_delay + ds0.wet_delay).squeeze("time", drop=True)
+    td1 = (ds1.hydrostatic_delay + ds1.wet_delay).squeeze("time", drop=True)
+    out = ds0.copy(deep=True)
+    out["total_delay"] = (1.0 - w) * td0 + w * td1
+    return out
 
 
 def _height_to_utm_surface(
@@ -109,7 +115,7 @@ def _height_to_utm_surface(
     td_3d = td_3d.rename(latitude="y", longitude="x")  # rioxarray expects y/x
     if dem_utm.rio.crs != "epsg:4326":
         td_utm = td_3d.rio.write_crs("epsg:4326").rio.reproject(
-            dem_utm.rio.crs, resampling="cubic"
+            dem_utm.rio.crs, resampling=Resampling.cubic
         )
         td_utm = td_utm.isel(x=slice(2, -2), y=slice(2, -2))  # trim edges
     else:
